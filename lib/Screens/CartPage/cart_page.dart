@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -7,9 +8,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 import 'package:topmaybe/constant.dart';
 
+import '../../api_base/api_response.dart';
 import '../MyAddress/address_list_page.dart';
 import 'GetCart/get_cart_model.dart';
 import 'GetCart/get_cart_repository.dart';
+import 'SetCart/SetCartBloc.dart';
+import 'SetCart/setcart_model.dart';
 
 
 class CartPage extends StatefulWidget {
@@ -38,6 +42,8 @@ class _CartPageState extends State<CartPage> {
   Future<GetCartModel>? _getCart;
   late GetCartRepository _getCartRepository;
   final TextEditingController _couponCode = TextEditingController();
+  bool setCart=false;
+  final SetCartBloc _setCartBloc=SetCartBloc();
   Future<void> createSharedPref() async {
     prefs = await SharedPreferences.getInstance();
     // print("cartId at Cart page1" + prefs.getString("cart_id"));
@@ -90,7 +96,7 @@ class _CartPageState extends State<CartPage> {
                       },
                     ),
                     title: Text(
-                      " My Cart",
+                      " My Cart (${snapshot.data!.Data!.itemListModels!.length.toString()} Items)",
                       style: TextStyle(
                           color: Colors.white,
                           fontSize: 12.sp,
@@ -120,6 +126,67 @@ class _CartPageState extends State<CartPage> {
                     padding: EdgeInsets.fromLTRB(5.0.w, 0.0, 5.0.w, 3.0.w),
                     shrinkWrap: true,
                     children: [
+                      StreamBuilder<ApiResponse<SetCartModel>>(
+                        stream: _setCartBloc.setCartStream,
+                        builder: (context, snapshot2) {
+                          if (snapshot2.hasData) {
+                            switch (snapshot2.data!.status) {
+                              case Status.LOADING:
+                                // return const CircularProgressIndicator(
+                                //     backgroundColor: Colors.white,
+                                //     strokeWidth: 3,
+                                //     valueColor: AlwaysStoppedAnimation<Color>(
+                                //         darkThemeOrange));
+
+                                break;
+                              case Status.COMPLETED:
+                                {
+                                  if (setCart) {
+
+                                    if(snapshot2.data!.data.Code != 0){
+                                      // managedSharedPref(snapshot2.data!.data);
+                                      // Future.delayed(Duration.zero, () {
+                                      //   Get.offAll(() => const CartPage());
+                                      //
+                                      // });
+
+                                    }else{
+                                      Fluttertoast.showToast(
+                                          msg: "Something is wrong",
+                                          fontSize: 14,
+                                          backgroundColor: Colors.white,
+                                          gravity: ToastGravity.CENTER,
+                                          textColor: darkThemeBlue,
+                                          toastLength: Toast.LENGTH_LONG);
+                                    }
+                                  }
+                                  setCart = false;
+
+                                }
+                                break;
+                              case Status.ERROR:
+                                if (kDebugMode) {
+                                  print(snapshot.error);
+                                  Fluttertoast.showToast(
+                                      msg: "Something is wrong",
+                                      fontSize: 14,
+                                      backgroundColor: Colors.white,
+                                      gravity: ToastGravity.CENTER,
+                                      textColor: darkThemeBlue,
+                                      toastLength: Toast.LENGTH_LONG);
+                                  //   Error(
+                                  //   errorMessage: snapshot.data.message,
+                                  // );
+
+                                }
+                                break;
+                            }
+                          } else if (snapshot.hasError) {
+                            print("error");
+                          }
+                          return Container();
+                        },
+                      ),
                       SizedBox(height: 4.h,),
                       ListView.builder(
                         itemCount: snapshot.data!.Data!.itemListModels!.length,
@@ -240,6 +307,15 @@ class _CartPageState extends State<CartPage> {
                                                         //   "distance": "$_distance"
                                                         // };
                                                         // _cartItemsUpdateBloc.cartItemsUpdate(body);
+                                                        setCart=true;
+                                                        Map body ={
+                                                          "cart_cus_id": userId,
+                                                          "cart_seller_id": "${snapshot.data!.Data!.itemListModels![index]!.itmId}",
+                                                          "cart_itm_id": "${snapshot.data!.Data!.itemListModels![index]!.itmId}",
+                                                          "cart_isku_id": "${snapshot.data!.Data!.itemListModels![index]!.iskuId}",
+                                                          "cart_qty": "$_quantity"
+                                                        };
+                                                        _setCartBloc.setCart(body);
                                                         setState(() {
                                                           _productAmount[index]--;
                                                           cartChangeCheck = true;
@@ -275,6 +351,15 @@ class _CartPageState extends State<CartPage> {
                                                         //   "distance": "$_distance"
                                                         // };
                                                         //_cartItemsUpdateBloc.cartItemsUpdate(body);
+                                                        setCart=true;
+                                                        Map body ={
+                                                          "cart_cus_id": userId,
+                                                          "cart_seller_id": "${snapshot.data!.Data!.itemListModels![index]!.itmId}",
+                                                          "cart_itm_id": "${snapshot.data!.Data!.itemListModels![index]!.itmId}",
+                                                          "cart_isku_id": "${snapshot.data!.Data!.itemListModels![index]!.iskuId}",
+                                                          "cart_qty": "$_quantity"
+                                                        };
+                                                        _setCartBloc.setCart(body);
                                                         setState(() {
                                                           _productAmount[index]++;
                                                           cartChangeCheck = true;

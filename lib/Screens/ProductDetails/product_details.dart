@@ -24,6 +24,7 @@ import '../CustomerReviews/GetItemReview/get_item_review_model.dart';
 import '../CustomerReviews/GetItemReview/get_item_review_repository.dart';
 import '../WishList/WishListAdded/FavoriteAddBloc.dart';
 import '../WishList/WishListAdded/FavoriteAddModel.dart';
+import '../customWidgets/carticon_widget.dart';
 //import '../customWidgets/htmlfile.dart';
 //import '../customWidgets/htmlfile.dart';
 
@@ -49,6 +50,7 @@ class _ProductDetailsState extends State<ProductDetails> {
   bool _isFavorite =true;
   bool gotCrt=false;
   bool setCart=false;
+  bool setCart1=false;
   bool addWishlist=false;
   List<String> bannerImagesAPI = [
     "images/headphone.jpg",
@@ -211,14 +213,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                     textAlign: TextAlign.start,
                   ),
                   actions: [
-                    IconButton(
-                      onPressed: () {},
-                      icon: Icon(
-                        Icons.shopping_cart,
-                        color: darkThemeBlue,
-                        size: 18.sp,
-                      ),
-                    ),
+                    const CartIconWidget(),
                     IconButton(
                       onPressed: () {},
                       icon: Icon(
@@ -862,7 +857,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                             width: 5.w,
                           ),
                           Text(
-                            "${snapshot.data!.Data!.itmWarranty!} Replacement Warranty",
+                            "${snapshot.data!.Data!.itmWarranty} Replacement Warranty",
                             // maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -1838,28 +1833,98 @@ class _ProductDetailsState extends State<ProductDetails> {
                           setState(() {
                             gotCrt=! gotCrt;
                           });
+                          setCart1=true;
+                          Map body ={
+                            "cart_cus_id": userId,
+                            "cart_seller_id": "${snapshot.data!.Data!.itemSkuDetailsModels![0]!.sstkSellerId!}",
+                            "cart_itm_id": "${snapshot.data!.Data!.itmId!}",
+                            "cart_isku_id": "${snapshot.data!.Data!.itemSkuDetailsModels![0]!.iskuId!}",
+                            "cart_qty": "1"
+                          };
+                          _setCartBloc.setCart(body);
                         },
-                        child: Container(
-                          width: 50.w,
-                          decoration: const BoxDecoration(
-                            color: darkThemeBlue,
-                            // gradient: LinearGradient(
-                            //   begin: Alignment.centerLeft,
-                            //   end: Alignment.centerRight,
-                            //   colors: <Color>[
-                            //     darkThemeBlue,
-                            //     darkThemeOrange,
-                            //   ],
-                            // ),
-                          ),
-                          child: const Center(
-                            child: Text(
-                              'ADD TO CART',
-                              style: TextStyle(
-                                  color: Colors.white, fontWeight: FontWeight.bold),
-                            ),
-                          ),
+                        child: StreamBuilder<ApiResponse<SetCartModel>>(
+                          stream: _setCartBloc.setCartStream,
+                          builder: (context, snapshot2) {
+                            if (snapshot2.hasData) {
+                              switch (snapshot2.data!.status) {
+                                case Status.LOADING:
+                                  return const CircularProgressIndicator(
+                                      backgroundColor: Colors.white,
+                                      strokeWidth: 3,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          darkThemeOrange));
+
+                                  break;
+                                case Status.COMPLETED:
+                                  {
+                                    if (setCart1) {
+
+                                      if(snapshot2.data!.data.Code != 0){
+                                        // // managedSharedPref(snapshot2.data!.data);
+                                        // Future.delayed(Duration.zero, () {
+                                        //   Get.offAll(() => const CartPage());
+                                        //
+                                        // });
+
+                                      }else{
+                                        Fluttertoast.showToast(
+                                            msg: "Something is wrong",
+                                            fontSize: 14,
+                                            backgroundColor: Colors.white,
+                                            gravity: ToastGravity.CENTER,
+                                            textColor: darkThemeBlue,
+                                            toastLength: Toast.LENGTH_LONG);
+                                      }
+                                    }
+                                    setCart1 = false;
+
+                                  }
+                                  break;
+                                case Status.ERROR:
+                                  if (kDebugMode) {
+                                    print(snapshot.error);
+                                    Fluttertoast.showToast(
+                                        msg: "Something is wrong",
+                                        fontSize: 14,
+                                        backgroundColor: Colors.white,
+                                        gravity: ToastGravity.CENTER,
+                                        textColor: darkThemeBlue,
+                                        toastLength: Toast.LENGTH_LONG);
+                                    //   Error(
+                                    //   errorMessage: snapshot.data.message,
+                                    // );
+
+                                  }
+                                  break;
+                              }
+                            } else if (snapshot.hasError) {
+                              print("error");
+                            }
+                            return Container(
+                              width: 50.w,
+                              decoration: const BoxDecoration(
+                                color: darkThemeBlue,
+                                // gradient: LinearGradient(
+                                //   begin: Alignment.centerLeft,
+                                //   end: Alignment.centerRight,
+                                //   colors: <Color>[
+                                //     darkThemeBlue,
+                                //     darkThemeOrange,
+                                //   ],
+                                // ),
+                              ),
+                              child: const Center(
+                                child: Text(
+                                  'ADD TO CART',
+                                  style: TextStyle(
+                                      color: Colors.white, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            );
+                          },
                         ),
+
                       ),
                       InkWell(
                         onTap: () {

@@ -338,9 +338,10 @@ class _ProductByCategoryState extends State<ProductByCategory> {
      showModalBottomSheet(
          context: context,
          shape: RoundedRectangleBorder(
-           borderRadius: BorderRadius.circular(30.0),
+           borderRadius: BorderRadius.circular(5.0),
          ),
          backgroundColor: Colors.white,
+         isScrollControlled: true,
          //backgroundColor: Colors.cyan,
          builder: (builder){
            return  ChildCat(catName: catName,catId: catId,);
@@ -379,130 +380,137 @@ class _ChildCatState extends State<ChildCat> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Container(
-        decoration:  const BoxDecoration(
-            color: Colors.white,
-            borderRadius:  BorderRadius.only(
-                topLeft: Radius.circular(25.0),
-                topRight: Radius.circular(25.0))),
-        child: ListView(
-        shrinkWrap: true,
-        physics: const AlwaysScrollableScrollPhysics(),
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        // appBar: AppBar(
+        //   title: Text("jii"),
+        // ),
+        body: Container(
+          //height: 10.h,
+          decoration:  const BoxDecoration(
+              color: Colors.white,
+              borderRadius:  BorderRadius.only(
+                  topLeft: Radius.circular(5.0),
+                  topRight: Radius.circular(5.0))),
+          child: ListView(
+          shrinkWrap: true,
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            SizedBox(height: 5.h,),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
 
-              children: [
-                SizedBox(width: 3.w,),
-                Text(widget.catName,
-                  style: TextStyle(fontWeight: FontWeight.bold,fontSize: 15.sp),
-                ),
-                const Spacer(),
-                InkWell(
-                  onTap: (){
-                    Get.back();
-                  },
-                  child: Icon(
-                    Icons.cancel_rounded,
-                    color: darkThemeOrange,
-                    size: 23.sp,
+                children: [
+                  SizedBox(width: 3.w,),
+                  Text(widget.catName,
+                    style: TextStyle(fontWeight: FontWeight.bold,fontSize: 15.sp),
                   ),
-                ),
-                SizedBox(width: 2.w,),
-              ],
+                  const Spacer(),
+                  InkWell(
+                    onTap: (){
+                      Get.back();
+                    },
+                    child: Icon(
+                      Icons.cancel_rounded,
+                      color: darkThemeOrange,
+                      size: 23.sp,
+                    ),
+                  ),
+                  SizedBox(width: 2.w,),
+                ],
+              ),
+
             ),
-
-          ),
-          FutureBuilder<ProductModel>(
-            future: _getChildCategory,
-            builder: (context,snapshot){
-              if(snapshot.hasData){
-                return GridView.builder(
-                  physics: const ScrollPhysics(),
-                  shrinkWrap: true,
-                  padding: const EdgeInsets.only(left: 5, right: 5, top: 5),
-                  gridDelegate:  SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 3.0,
-                    mainAxisSpacing: 5.0,
-                    childAspectRatio: MediaQuery.of(context).size.width /
-                        (MediaQuery.of(context).size.height / 1.87),
-                  ),
-                  itemCount: snapshot.data!.Data!.length,
-                  itemBuilder: (context, index) {
-                    return InkWell(
-                      onTap: () {
-                        Get.to(() => Product(categoryName: snapshot.data!.Data![index]!.catName!,
-                          categoryId: snapshot.data!.Data![index]!.catId.toString(),
-                        ));
-                      },
-                      child: Card(
-                        elevation: 0,
-                        child: Container(
-                          width: MediaQuery.of(context).size.width * 0.475,
-                          //color: Colors.red,
-                          padding: const EdgeInsets.all(5),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child:
-                                Center(
-                                  child: FadeInImage(
-                                    image: NetworkImage(
-                                        snapshot.data!.Data![index]!.catImage!),
-                                    width: 35.w,
-                                    height: 15.h,
-                                    placeholder: const AssetImage("images/headphone.jpg"),
-                                    fit: BoxFit.fill,
+            FutureBuilder<ProductModel>(
+              future: _getChildCategory,
+              builder: (context,snapshot){
+                if(snapshot.hasData){
+                  return GridView.builder(
+                    physics: const ScrollPhysics(),
+                    shrinkWrap: true,
+                    padding: const EdgeInsets.only(left: 5, right: 5, top: 5),
+                    gridDelegate:  SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 3.0,
+                      mainAxisSpacing: 5.0,
+                      childAspectRatio: MediaQuery.of(context).size.width /
+                          (MediaQuery.of(context).size.height / 1.87),
+                    ),
+                    itemCount: snapshot.data!.Data!.length,
+                    itemBuilder: (context, index) {
+                      return InkWell(
+                        onTap: () {
+                          Get.to(() => Product(categoryName: snapshot.data!.Data![index]!.catName!,
+                            categoryId: snapshot.data!.Data![index]!.catId.toString(),
+                          ));
+                        },
+                        child: Card(
+                          elevation: 0,
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.475,
+                            //color: Colors.red,
+                            padding: const EdgeInsets.all(5),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child:
+                                  Center(
+                                    child: FadeInImage(
+                                      image: NetworkImage(
+                                          snapshot.data!.Data![index]!.catImage!),
+                                      width: 35.w,
+                                      height: 15.h,
+                                      placeholder: const AssetImage("images/headphone.jpg"),
+                                      fit: BoxFit.fill,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              SizedBox(height: 1.1.h,),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                  snapshot.data!.Data![index]!.catName!,
-                                  //"boAt Rockerz 510 Super Extra Bass Bluetooth headphone",
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(fontSize: 11.sp, color: Colors.black),
+                                SizedBox(height: 1.1.h,),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    snapshot.data!.Data![index]!.catName!,
+                                    //"boAt Rockerz 510 Super Extra Bass Bluetooth headphone",
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(fontSize: 11.sp, color: Colors.black),
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  },
-                );
-              }
-              else if(snapshot.hasError){
-                if (kDebugMode) {
-                  print("Error:- ${snapshot.error}");
+                      );
+                    },
+                  );
                 }
-                return const Center(
-                    child: Text(
-                      "No Data ",
-                      style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-                    ));
-              }
-              else {
-                return const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(
-                  darkThemeOrange,
-                ),));
-              }
-            },
+                else if(snapshot.hasError){
+                  if (kDebugMode) {
+                    print("Error:- ${snapshot.error}");
+                  }
+                  return const Center(
+                      child: Text(
+                        "No Data ",
+                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                      ));
+                }
+                else {
+                  return const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(
+                    darkThemeOrange,
+                  ),));
+                }
+              },
 
-          ),
+            ),
 
 
-        ],
-    ),
+          ],
+      ),
+        ),
       ),
     );
   }

@@ -17,8 +17,10 @@ import '../Login/login_page.dart';
 import '../MyAddress/manage_addresses.dart';
 import '../MyOrderHistory/my_order_history.dart';
 import '../ProductByCategory/product_by_category.dart';
+import '../ProductList/product_list.dart';
 import '../WishList/WishListAdded/FavoriteAddBloc.dart';
 import '../WishList/WishlistPage/WishlistPage.dart';
+import '../customWidgets/carticon_widget.dart';
 import 'GetAllActiveDeals/GetAllActiveDealsOfTheDay/get_all_active_deals_of_the_day_model.dart';
 import 'GetAllActiveDeals/get_all_active_deals_repository.dart';
 import 'GetAllActiveDeals/get_best_seller.dart';
@@ -66,6 +68,8 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
   List<String> bannerImagesAPI = [];
   List<String> bannerImagesAPI2 = [];
+  List<String> bannerImagesAPI3 = [];
+  List<String> bannerImagesAPI4 = [];
   List<String> itemByPrice = [];
   List<String> bannerImages = [
     "images/bn1.jpg",
@@ -197,6 +201,8 @@ class _HomeScreenState extends State<HomeScreen> {
   late Map _body;
   Future<GetBannerforHomePageModel>? _getBannerforHomePage;
   Future<GetBanner2Model>? _getBanner2; //
+  Future<GetBannerforHomePageModel>? _getBannerforHomePage3;
+  Future<GetBannerforHomePageModel>? _getBannerforHomePage4;
   late GetBannerforHomePageRepository _getBannerforHomePageRepository;
 
   Future<GetMainCategoryModel>? _getMainCategoryModel;
@@ -227,6 +233,8 @@ class _HomeScreenState extends State<HomeScreen> {
     _body = {};
     _getBannerforHomePage = _getBannerforHomePageRepository.getBanner(_body);
     _getBanner2 = _getBannerforHomePageRepository.getBanner2(_body);
+    _getBannerforHomePage3 = _getBannerforHomePageRepository.getBanner3(_body);
+    _getBannerforHomePage4 = _getBannerforHomePageRepository.getBanner4(_body);
 
     _getMainCategoryRepository = GetMainCategoryRepository();
     _getMainCategoryModel = _getMainCategoryRepository.getMainCategory(_body);
@@ -323,16 +331,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     // ),
                   ),
                   actions: [
-                    IconButton(
-                      onPressed: () {
-                        Get.to(() => const CartPage());
-                      },
-                      icon: Icon(
-                        Icons.shopping_cart,
-                        color: darkThemeBlue,
-                        size: 18.sp,
-                      ),
-                    ),
+                    const CartIconWidget(),
                     userLogin
                         ? Container()
                         : IconButton(
@@ -437,6 +436,29 @@ class _HomeScreenState extends State<HomeScreen> {
                   "${difference.inHours} : ${difference.inMinutes.remainder(60)} : ${difference.inSeconds.remainder(60)}",
                   style: TextStyle(color: Colors.black, fontSize: 12.sp),
                 )),
+                const Spacer(),
+                InkWell(
+                  onTap: (){
+                    Get.to(() => const ProductList(
+                      varName: "Deals of the day",
+                      categoryId: "0",
+                    ));
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(8.0),
+                    margin: const EdgeInsets.only(right: 10, left: 10, top: 8),
+                    height: 4.h,
+                    width: 17.w,
+                    color: darkThemeBlue,
+                    child: Text(
+                      "View all",
+                      style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 10.5.sp,
+                          color: Colors.white),
+                    ),
+                  ),
+                ),
               ],
             ),
             dealsOfDay(difference),
@@ -452,24 +474,78 @@ class _HomeScreenState extends State<HomeScreen> {
             Padding(
               padding: const EdgeInsets.only(
                   right: 8.0, left: 12, top: 8, bottom: 8),
-              child: Text(
-                "Top Offers",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13.sp,
-                    color: Colors.black),
+              child: Row(
+                children: [
+                  Text(
+                    "Top Offers",
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13.sp,
+                        color: Colors.black),
+                  ),
+                  const Spacer(),
+                  InkWell(
+                    onTap: (){
+                      Get.to(() => const ProductList(
+                        varName: "Top Offers",
+                        categoryId: "0",
+                      ));
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8.0),
+                      margin: const EdgeInsets.only(right: 10, left: 10, top: 8),
+                      height: 4.h,
+                      width: 17.w,
+                      color: darkThemeBlue,
+                      child: Text(
+                        "View all",
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 10.5.sp,
+                            color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             topOffer(),
             Padding(
               padding: const EdgeInsets.only(
                   right: 8.0, left: 12, top: 8, bottom: 8),
-              child: Text(
-                "Best Seller",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13.sp,
-                    color: Colors.black),
+              child: Row(
+                children: [
+                  Text(
+                    "Best Seller",
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13.sp,
+                        color: Colors.black),
+                  ),
+                  const Spacer(),
+                  InkWell(
+                    onTap: (){
+                      Get.to(() => const ProductList(
+                        varName: "Best Seller",
+                        categoryId: "0",
+                      ));
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8.0),
+                      margin: const EdgeInsets.only(right: 10, left: 10, top: 8),
+                      height: 4.h,
+                      width: 17.w,
+                      color: darkThemeBlue,
+                      child: Text(
+                        "View all",
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 10.5.sp,
+                            color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             bestseller(difference),
@@ -480,12 +556,39 @@ class _HomeScreenState extends State<HomeScreen> {
             Padding(
               padding: const EdgeInsets.only(
                   right: 8.0, left: 12, top: 8, bottom: 8),
-              child: Text(
-                "New Arrival",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13.sp,
-                    color: Colors.black),
+              child: Row(
+                children: [
+                  Text(
+                    "New Arrival",
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13.sp,
+                        color: Colors.black),
+                  ),
+                  const Spacer(),
+                  InkWell(
+                    onTap: (){
+                      Get.to(() => const ProductList(
+                        varName: "New Arrival",
+                        categoryId: "0",
+                      ));
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8.0),
+                      margin: const EdgeInsets.only(right: 10, left: 10, top: 8),
+                      height: 4.h,
+                      width: 17.w,
+                      color: darkThemeBlue,
+                      child: Text(
+                        "View all",
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 10.5.sp,
+                            color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             // Container(
@@ -493,6 +596,8 @@ class _HomeScreenState extends State<HomeScreen> {
             //   color: Colors.grey[100],
             // ),
             newArrival(difference),
+            bannerSlider3(),
+            bannerSlider4(),
             Container(
               height: 3,
               color: Colors.grey[100],
@@ -900,6 +1005,144 @@ class _HomeScreenState extends State<HomeScreen> {
               darkThemeOrange,
             ),
           ));
+        }
+      },
+    );
+  }
+  Widget bannerSlider3() {
+    return FutureBuilder<GetBannerforHomePageModel>(
+      future: _getBannerforHomePage3,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          for (int i = 0; i < snapshot.data!.Data!.length; i++) {
+            bannerImagesAPI3.add(snapshot.data!.Data![i]!.bnrImage!);
+          }
+          return Container(
+            //padding: const EdgeInsets.all(8.0),
+            margin: const EdgeInsets.all(8.0),
+            child: CarouselSlider(
+              options: CarouselOptions(
+                //height: MediaQuery.of(context).size.height,
+                height: MediaQuery.of(context).size.height * 0.21,
+                viewportFraction: 1.0,
+                enlargeCenterPage: false,
+                autoPlay: true,
+              ),
+              items: bannerImagesAPI3.map((item) => Container(
+                decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: NetworkImage(item),
+                      fit: BoxFit.fill,
+                    ),
+                    borderRadius: BorderRadius.circular(
+                        6) // use instead of BorderRadius.all(Radius.circular(20))
+                ),
+                // child: Center(
+                //   child: FadeInImage(
+                //     image: NetworkImage(
+                //         item),
+                //     width: MediaQuery.of(context).size.width,
+                //     height: MediaQuery.of(context).size.height * 0.3,
+                //     placeholder: const AssetImage("images/bn1.jpg"),
+                //     fit: BoxFit.fill,
+                //   ),
+                //
+                //   // Image.asset(
+                //   //   item,
+                //   //   fit: BoxFit.cover,
+                //   //   width: MediaQuery.of(context).size.width,
+                //   //   height: MediaQuery.of(context).size.height * 0.3,
+                //   // )
+                // ),
+              ))
+                  .toList(),
+            ),
+          );
+        } else if (snapshot.hasError) {
+          print("hello");
+          return Container(
+            child: const Center(
+                child: Text(
+                  "No Data ",
+                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                )),
+          );
+        } else {
+          return const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  darkThemeOrange,
+                ),
+              ));
+        }
+      },
+    );
+  }
+  Widget bannerSlider4() {
+    return FutureBuilder<GetBannerforHomePageModel>(
+      future: _getBannerforHomePage4,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          for (int i = 0; i < snapshot.data!.Data!.length; i++) {
+            bannerImagesAPI4.add(snapshot.data!.Data![i]!.bnrImage!);
+          }
+          return Container(
+            //padding: const EdgeInsets.all(8.0),
+            margin: const EdgeInsets.all(8.0),
+            child: CarouselSlider(
+              options: CarouselOptions(
+                //height: MediaQuery.of(context).size.height,
+                height: MediaQuery.of(context).size.height * 0.21,
+                viewportFraction: 1.0,
+                enlargeCenterPage: false,
+                autoPlay: true,
+              ),
+              items: bannerImagesAPI4.map((item) => Container(
+                decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: NetworkImage(item),
+                      fit: BoxFit.fill,
+                    ),
+                    borderRadius: BorderRadius.circular(
+                        6) // use instead of BorderRadius.all(Radius.circular(20))
+                ),
+                // child: Center(
+                //   child: FadeInImage(
+                //     image: NetworkImage(
+                //         item),
+                //     width: MediaQuery.of(context).size.width,
+                //     height: MediaQuery.of(context).size.height * 0.3,
+                //     placeholder: const AssetImage("images/bn1.jpg"),
+                //     fit: BoxFit.fill,
+                //   ),
+                //
+                //   // Image.asset(
+                //   //   item,
+                //   //   fit: BoxFit.cover,
+                //   //   width: MediaQuery.of(context).size.width,
+                //   //   height: MediaQuery.of(context).size.height * 0.3,
+                //   // )
+                // ),
+              ))
+                  .toList(),
+            ),
+          );
+        } else if (snapshot.hasError) {
+          print("hello");
+          return Container(
+            child: const Center(
+                child: Text(
+                  "No Data ",
+                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                )),
+          );
+        } else {
+          return const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  darkThemeOrange,
+                ),
+              ));
         }
       },
     );
@@ -2255,12 +2498,39 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   snapshot.data!.Data != null ? Padding(
                     padding: const EdgeInsets.only(right: 8.0, left: 12, top: 8, bottom: 8),
-                    child: Text(
-                      "Recently Viewed",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13.sp,
-                          color: Colors.black),
+                    child: Row(
+                      children: [
+                        Text(
+                          "Recently Viewed",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13.sp,
+                              color: Colors.black),
+                        ),
+                        const Spacer(),
+                        InkWell(
+                          onTap: (){
+                            Get.to(() => const ProductList(
+                              varName: "Recently Viewed",
+                              categoryId: "0",
+                            ));
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(8.0),
+                            margin: const EdgeInsets.only(right: 10, left: 10, top: 8),
+                            height: 4.h,
+                            width: 17.w,
+                            color: darkThemeBlue,
+                            child: Text(
+                              "View all",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 10.5.sp,
+                                  color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ): Container(),
                   snapshot.data!.Data != null ? SizedBox(

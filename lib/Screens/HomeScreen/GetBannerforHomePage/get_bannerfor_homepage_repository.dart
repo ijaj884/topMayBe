@@ -17,5 +17,15 @@ class GetBannerforHomePageRepository{
     final response= await _apiBaseHelper.post("CusApi/Banner/GetBannerForHomePage/2", body);
     return GetBanner2Model.fromJson(response);
   }
+  Future<GetBannerforHomePageModel> getBanner3(body) async{
+    // Map body={};
+    final response= await _apiBaseHelper.post("CusApi/Banner/GetBannerForHomePage/3", body);
+    return GetBannerforHomePageModel.fromJson(response);
+  }
+  Future<GetBannerforHomePageModel> getBanner4(body) async{
+    // Map body={};
+    final response= await _apiBaseHelper.post("CusApi/Banner/GetBannerForHomePage/4", body);
+    return GetBannerforHomePageModel.fromJson(response);
+  }
 
 }

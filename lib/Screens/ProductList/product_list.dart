@@ -1,28 +1,28 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-//import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
-import 'package:topmaybe/Screens/Product/product_model.dart';
-import 'package:topmaybe/Screens/Product/product_repository.dart';
+import 'package:topmaybe/Screens/ProductList/product_list_allrepository.dart';
 
 import '../../constant.dart';
 import '../CartPage/cart_page.dart';
+import '../HomeScreen/GetAllActiveDeals/new_arrival_model.dart';
 import '../ProductDetails/product_details.dart';
-import 'GetFilteredItemList/get_filtered_item_list_model.dart';
-import 'GetFilteredItemList/get_filtered_item_list_repository.dart';
+import '../WishList/WishListAdded/FavoriteAddBloc.dart';
 // ignore: must_be_immutable
-class Product extends StatefulWidget{
-  final String categoryName;
+class ProductList extends StatefulWidget{
+  final String varName;
   final String categoryId;
-  const Product({Key? key, required this.categoryName, required this.categoryId}) : super(key: key);
+  const ProductList({Key? key, required this.varName, required this.categoryId}) : super(key: key);
 
   @override
-  _ProductState createState() => _ProductState();
+  _ProductListState createState() => _ProductListState();
 }
 
-class _ProductState extends State<Product> {
+class _ProductListState extends State<ProductList> {
   //String categoryid;
 
   //_ProductByCategoryState(this.categoryid);
@@ -30,27 +30,45 @@ class _ProductState extends State<Product> {
   // Future<ProductModel>? _getChildCategory;
   // late GetAllActiveChildBySubRepository _getAllActiveChildBySubRepository;
 
-  Future<GetFilteredItemListModel>? _getFilterItem;
-  late GetFilteredItemListRepository _getFilteredItemListRepository;
+  // Future<GetFilteredItemListModel>? _getFilterItem;
+  // late GetFilteredItemListRepository _getFilteredItemListRepository;
+  Future<NewArrivalModel>? _getNewArrival;
+  late ProductListRepository _getAllActiveDealsRepository;
   String userId="0";
   final GlobalKey<ScaffoldState> _key = GlobalKey();
+  late SharedPreferences prefs;
+  final List<bool> _isFavoriteBest = [];
+  final FavoriteAddBloc _favoriteAddBloc = FavoriteAddBloc();
 
   Future<void> createSharedPref() async {
 
-    _getFilteredItemListRepository=GetFilteredItemListRepository();
-    Map body = {
-      "cus_id": userId,
-      "cat_id": widget.categoryId,
-      "tags": "",
-      "brand_id": 0,
-      "min_price": 0,
-      "max_price": 0
-    };
-    _getFilterItem = _getFilteredItemListRepository.getFilteredItem(body);
+
+    prefs = await SharedPreferences.getInstance();
+    if (userLogin) {
+      userId = prefs.getString("user_id")!;
+      _getAllActiveDealsRepository = ProductListRepository();
+      if(widget.varName=="Best Seller"){
+        _getNewArrival = _getAllActiveDealsRepository.getBestSeller(userId);
+      }
+      else if(widget.varName=="Top Offers"){
+        _getNewArrival = _getAllActiveDealsRepository.getTopOfer(userId);
+      }
+      else if(widget.varName=="Deals of the day"){
+        _getNewArrival = _getAllActiveDealsRepository.getDealsOfTheDay(userId);
+      }
+      //New Arrival
+      else if(widget.varName=="New Arrival"){
+        _getNewArrival = _getAllActiveDealsRepository.getNewArrival(userId);
+      }
+      else if(widget.varName=="Recently Viewed"){
+        _getNewArrival = _getAllActiveDealsRepository.getRecentlyViewed(userId);
+      }
+
+    }
     setState(() {});
   }
   String wistList="";
-  bool _isFavorite = true;
+  //final bool _isFavorite = true;
 
   @override
   void initState() {
@@ -63,7 +81,7 @@ class _ProductState extends State<Product> {
   String minPrice="0";
   String maxPrice="";
   String sortBy="";
-  String _paymentMode="";
+  //String _paymentMode="";
 
 
 
@@ -71,201 +89,201 @@ class _ProductState extends State<Product> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _key,
-      drawer: Drawer(
-        child: ListView(
-          //crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              height: 7.0.h,
-              color: darkThemeOrange,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(left: 4.5.w, top: 1.0),
-                    child: Text(
-                      "Filter",
-                      style: TextStyle(color: Colors.white, fontSize: 14.sp),
-                    ),
-                  ),
-                  InkWell(
-                    onTap: () {
-                      Get.back();
-                    },
-                    child: Padding(
-                      padding: EdgeInsets.only(right: 4.0.w),
-                      child: Icon(
-                        Icons.cancel_sharp,
-                        color: Colors.white,
-                        size: 20.sp,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(
-              height: 2.h,
-            ),
-            Padding(
-              padding: EdgeInsets.only(left: 4.5.w, top: 1.0),
-              child: Text(
-                "Price",
-                style: TextStyle(color: Colors.black, fontSize: 14.sp),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(left: 4.5.w, top: 1.0),
-              child: Row(
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        "from :",
-                        style: TextStyle(color: Colors.black, fontSize: 12.sp),
-                      ),
-                      Container(
-                        margin: const EdgeInsets.all(10.0),
-                        padding: const EdgeInsets.only(left: 8.0,right: 8,top: 3.0,bottom: 3.0),
-                        decoration:BoxDecoration(
-                          border: Border.all(color: Colors.grey),
-                        ),
-                        child: Center(
-                          child: Text(
-                            minPrice,
-                            style: TextStyle(color: Colors.black, fontSize: 12.sp),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(width: 5.w,),
-                  Row(
-                    children: [
-                      Text(
-                        "to :",
-                        style: TextStyle(color: Colors.black, fontSize: 12.sp),
-                      ),
-                      Container(
-                        margin: const EdgeInsets.all(10.0),
-                        padding: const EdgeInsets.only(left: 8.0,right: 8,top: 3.0,bottom: 3.0),
-                        decoration:BoxDecoration(
-                          border: Border.all(color: Colors.grey),
-                        ),
-                        child: Center(
-                          child: Text(
-                            maxPrice,
-                            style: TextStyle(color: Colors.black, fontSize: 12.sp),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: RangeSlider(
-                  divisions: 200,
-                  activeColor: lightThemeBlue,
-                  inactiveColor: Colors.blue[300],
-                  min: 0,
-                  max: 100000,
-                  values: values,
-                  labels: labels,
-                  onChanged: (value){
-                    print("START: ${value.start}, End: ${value.end}");
-                    setState(() {
-                      values =value;
-                      minPrice=value.start.toStringAsFixed(0);
-                      maxPrice=value.end.toStringAsFixed(0);
-                      labels =RangeLabels(value.start.toInt().toString(), value.end.toInt().toString());
-                    });
-                  }
-              ),
-            ),
-
-
-            const Divider(thickness: 0.7),
-            SizedBox(height: 30.h,),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 6.0.w),
-              child: RawMaterialButton(
-                onPressed: () async {
-                  if(maxPrice !="0"){
-                    Map body = {
-                      "cus_id": userId,
-                      "cat_id": widget.categoryId,
-                      "tags": "",
-                      "brand_id": 0,
-                      "min_price": minPrice,
-                      "max_price": maxPrice
-                    };
-                    setState(() {
-                      _getFilterItem = _getFilteredItemListRepository.getFilteredItem(body);
-                    });
-                  }else{
-                    Map body = {
-                      "cus_id": userId,
-                      "cat_id": widget.categoryId,
-                      "tags": "",
-                      "brand_id": 0,
-                      "min_price": minPrice,
-                      "max_price": 1
-                    };
-                    setState(() {
-                      _getFilterItem = _getFilteredItemListRepository.getFilteredItem(body);
-                    });
-                  }
-
-                  //Future.delayed(Duration.zero, () {});
-                  Get.back();
-
-                },
-                elevation: 0,
-                hoverElevation: 0,
-                focusElevation: 0,
-                highlightElevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(
-                    0,
-                  ),
-                ),
-                child: Ink(
-                  //padding: padding,
-                  height: 5.5.h,
-                  decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                          colors: [darkThemeBlue, darkThemeBlue])),
-                  child: Center(
-                    child: Text(
-                      "Apply",
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 13.sp,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-
-          ],
-        ),
-      ),
+      // drawer: Drawer(
+      //   child: ListView(
+      //     //crossAxisAlignment: CrossAxisAlignment.start,
+      //     children: [
+      //       Container(
+      //         height: 7.0.h,
+      //         color: darkThemeOrange,
+      //         child: Row(
+      //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      //           children: [
+      //             Padding(
+      //               padding: EdgeInsets.only(left: 4.5.w, top: 1.0),
+      //               child: Text(
+      //                 "Filter",
+      //                 style: TextStyle(color: Colors.white, fontSize: 14.sp),
+      //               ),
+      //             ),
+      //             InkWell(
+      //               onTap: () {
+      //                 Get.back();
+      //               },
+      //               child: Padding(
+      //                 padding: EdgeInsets.only(right: 4.0.w),
+      //                 child: Icon(
+      //                   Icons.cancel_sharp,
+      //                   color: Colors.white,
+      //                   size: 20.sp,
+      //                 ),
+      //               ),
+      //             ),
+      //           ],
+      //         ),
+      //       ),
+      //       SizedBox(
+      //         height: 2.h,
+      //       ),
+      //       Padding(
+      //         padding: EdgeInsets.only(left: 4.5.w, top: 1.0),
+      //         child: Text(
+      //           "Price",
+      //           style: TextStyle(color: Colors.black, fontSize: 14.sp),
+      //         ),
+      //       ),
+      //       Padding(
+      //         padding: EdgeInsets.only(left: 4.5.w, top: 1.0),
+      //         child: Row(
+      //           children: [
+      //             Row(
+      //               children: [
+      //                 Text(
+      //                   "from :",
+      //                   style: TextStyle(color: Colors.black, fontSize: 12.sp),
+      //                 ),
+      //                 Container(
+      //                   margin: const EdgeInsets.all(10.0),
+      //                   padding: const EdgeInsets.only(left: 8.0,right: 8,top: 3.0,bottom: 3.0),
+      //                   decoration:BoxDecoration(
+      //                     border: Border.all(color: Colors.grey),
+      //                   ),
+      //                   child: Center(
+      //                     child: Text(
+      //                       minPrice,
+      //                       style: TextStyle(color: Colors.black, fontSize: 12.sp),
+      //                     ),
+      //                   ),
+      //                 ),
+      //               ],
+      //             ),
+      //             SizedBox(width: 5.w,),
+      //             Row(
+      //               children: [
+      //                 Text(
+      //                   "to :",
+      //                   style: TextStyle(color: Colors.black, fontSize: 12.sp),
+      //                 ),
+      //                 Container(
+      //                   margin: const EdgeInsets.all(10.0),
+      //                   padding: const EdgeInsets.only(left: 8.0,right: 8,top: 3.0,bottom: 3.0),
+      //                   decoration:BoxDecoration(
+      //                     border: Border.all(color: Colors.grey),
+      //                   ),
+      //                   child: Center(
+      //                     child: Text(
+      //                       maxPrice,
+      //                       style: TextStyle(color: Colors.black, fontSize: 12.sp),
+      //                     ),
+      //                   ),
+      //                 ),
+      //               ],
+      //             ),
+      //           ],
+      //         ),
+      //       ),
+      //       Padding(
+      //         padding: const EdgeInsets.all(8.0),
+      //         child: RangeSlider(
+      //             divisions: 200,
+      //             activeColor: lightThemeBlue,
+      //             inactiveColor: Colors.blue[300],
+      //             min: 0,
+      //             max: 100000,
+      //             values: values,
+      //             labels: labels,
+      //             onChanged: (value){
+      //               print("START: ${value.start}, End: ${value.end}");
+      //               setState(() {
+      //                 values =value;
+      //                 minPrice=value.start.toStringAsFixed(0);
+      //                 maxPrice=value.end.toStringAsFixed(0);
+      //                 labels =RangeLabels(value.start.toInt().toString(), value.end.toInt().toString());
+      //               });
+      //             }
+      //         ),
+      //       ),
+      //
+      //
+      //       const Divider(thickness: 0.7),
+      //       SizedBox(height: 30.h,),
+      //       Padding(
+      //         padding: EdgeInsets.symmetric(horizontal: 6.0.w),
+      //         child: RawMaterialButton(
+      //           onPressed: () async {
+      //             if(maxPrice !="0"){
+      //               Map body = {
+      //                 "cus_id": userId,
+      //                 "cat_id": widget.categoryId,
+      //                 "tags": "",
+      //                 "brand_id": 0,
+      //                 "min_price": minPrice,
+      //                 "max_price": maxPrice
+      //               };
+      //               setState(() {
+      //                 _getFilterItem = _getFilteredItemListRepository.getFilteredItem(body);
+      //               });
+      //             }else{
+      //               Map body = {
+      //                 "cus_id": userId,
+      //                 "cat_id": widget.categoryId,
+      //                 "tags": "",
+      //                 "brand_id": 0,
+      //                 "min_price": minPrice,
+      //                 "max_price": 1
+      //               };
+      //               setState(() {
+      //                 _getFilterItem = _getFilteredItemListRepository.getFilteredItem(body);
+      //               });
+      //             }
+      //
+      //             //Future.delayed(Duration.zero, () {});
+      //             Get.back();
+      //
+      //           },
+      //           elevation: 0,
+      //           hoverElevation: 0,
+      //           focusElevation: 0,
+      //           highlightElevation: 0,
+      //           shape: RoundedRectangleBorder(
+      //             borderRadius: BorderRadius.circular(
+      //               0,
+      //             ),
+      //           ),
+      //           child: Ink(
+      //             //padding: padding,
+      //             height: 5.5.h,
+      //             decoration: const BoxDecoration(
+      //                 gradient: LinearGradient(
+      //                     begin: Alignment.centerLeft,
+      //                     end: Alignment.centerRight,
+      //                     colors: [darkThemeBlue, darkThemeBlue])),
+      //             child: Center(
+      //               child: Text(
+      //                 "Apply",
+      //                 overflow: TextOverflow.ellipsis,
+      //                 maxLines: 1,
+      //                 style: TextStyle(
+      //                   color: Colors.white,
+      //                   fontSize: 13.sp,
+      //                 ),
+      //                 textAlign: TextAlign.center,
+      //               ),
+      //             ),
+      //           ),
+      //         ),
+      //       ),
+      //
+      //     ],
+      //   ),
+      // ),
       appBar: AppBar(
         centerTitle: false,
         titleSpacing: 0,
         backgroundColor: darkThemeOrange,
         bottomOpacity: 0.0,
         elevation: 0.0,
-        title: Text(widget.categoryName,
+        title: Text(widget.varName,
             style: TextStyle(
                 color: Colors.white,
                 fontSize: 15.sp,
@@ -340,7 +358,7 @@ class _ProductState extends State<Product> {
                                     children: [
                                       Expanded(
                                         flex: 1,
-                                        child: Container(
+                                        child: SizedBox(
                                           // height: 20.0,
                                           width: 100.w,
                                           child: Row(
@@ -371,7 +389,9 @@ class _ProductState extends State<Product> {
                                                   onChanged: (value) {
                                                     setState(() {
                                                       sortBy = value.toString();
-                                                      print(sortBy);
+                                                      if (kDebugMode) {
+                                                        print(sortBy);
+                                                      }
                                                     });
                                                   },
                                                 ),
@@ -383,7 +403,7 @@ class _ProductState extends State<Product> {
                                       ),
                                       Expanded(
                                         flex: 1,
-                                        child: Container(
+                                        child: SizedBox(
                                           // height: 20.0,
                                           width: 100.w,
                                           child: Row(
@@ -414,7 +434,9 @@ class _ProductState extends State<Product> {
                                                   onChanged: (value) {
                                                     setState(() {
                                                       sortBy = value.toString();
-                                                      print(sortBy);
+                                                      if (kDebugMode) {
+                                                        print(sortBy);
+                                                      }
                                                     });
                                                   },
                                                 ),
@@ -426,7 +448,7 @@ class _ProductState extends State<Product> {
                                       ),
                                       Expanded(
                                         flex: 1,
-                                        child: Container(
+                                        child: SizedBox(
                                           // height: 20.0,
                                           width: 100.w,
                                           child: Row(
@@ -457,7 +479,9 @@ class _ProductState extends State<Product> {
                                                   onChanged: (value) {
                                                     setState(() {
                                                       sortBy = value.toString();
-                                                      print(sortBy);
+                                                      if (kDebugMode) {
+                                                        print(sortBy);
+                                                      }
                                                     });
                                                   },
                                                 ),
@@ -469,7 +493,7 @@ class _ProductState extends State<Product> {
                                       ),
                                       Expanded(
                                         flex: 1,
-                                        child: Container(
+                                        child: SizedBox(
                                           // height: 20.0,
                                           width: 100.w,
                                           child: Row(
@@ -500,7 +524,9 @@ class _ProductState extends State<Product> {
                                                   onChanged: (value) {
                                                     setState(() {
                                                       sortBy = value.toString();
-                                                      print(sortBy);
+                                                      if (kDebugMode) {
+                                                        print(sortBy);
+                                                      }
                                                     });
                                                   },
                                                 ),
@@ -524,7 +550,7 @@ class _ProductState extends State<Product> {
               children: [
                 Row(
                   children: [
-                     SizedBox(
+                    SizedBox(
                       width: 3.w,
                     ),
                     Icon(
@@ -571,10 +597,16 @@ class _ProductState extends State<Product> {
             ),
           ),
           SizedBox(height: 3.h,),
-          FutureBuilder<GetFilteredItemListModel>(
-            future: _getFilterItem,
+          FutureBuilder<NewArrivalModel>(
+            future: _getNewArrival,
             builder: (context,snapshot){
               if(snapshot.hasData){
+               if(widget.varName !="Recently Viewed"){
+                 for (int i = 0; i < snapshot.data!.Data!.length; i++) {
+                   _isFavoriteBest.add(snapshot.data!.Data![i]!.isAddedToWishList!);
+                 }
+              }
+
                 if(snapshot.data!.Data!.isNotEmpty){
                   return GridView.builder(
                     physics: const ScrollPhysics(),
@@ -746,10 +778,10 @@ class _ProductState extends State<Product> {
                                 //right: 0,
                                 child: ClipOval(
                                   child: Container(
-                                    padding: EdgeInsets.all(3),
+                                    padding: const EdgeInsets.all(3),
                                     width: 5.h,
                                     height: 5.h,
-                                    decoration: BoxDecoration(
+                                    decoration: const BoxDecoration(
                                         color: Color.fromRGBO(202, 85, 44, 1) //(202, 85, 44)
                                     ),
                                     child: Center(
@@ -767,40 +799,58 @@ class _ProductState extends State<Product> {
                                   ),
                                 ),
                               ),
+                              widget.varName !="Recently Viewed" ?
                               Positioned(
                                 top: 0,
                                 //left: 0,
                                 right: 0,
                                 child: InkWell(
                                   onTap: () {
-                                    // _isFavorite[index]=!_isFavorite[index];
-                                    _isFavorite = !_isFavorite;
+                                    if (_isFavoriteBest[index] != true) {
+                                      Map body = {
+                                        "wl_cus_id": userId,
+                                        "wl_itm_id": snapshot.data!.Data![index]!.iskuItmId,
+                                        "wl_isku_id": snapshot.data!.Data![index]!.iskuId
+                                      };
+                                      _favoriteAddBloc.favoriteAdd(body);
+                                      _isFavoriteBest[index] = !_isFavoriteBest[index];
+                                      Fluttertoast.showToast(
+                                          msg: "Successfully Added to Wishlist",
+                                          fontSize: 14,
+                                          backgroundColor: Colors.white,
+                                          gravity: ToastGravity.BOTTOM,
+                                          textColor: darkThemeBlue,
+                                          toastLength: Toast.LENGTH_LONG);
+                                    }
                                   },
                                   child: Card(
                                     elevation: 10,
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius. circular(20),
+                                      borderRadius: BorderRadius.circular(20),
                                     ),
                                     color: Colors.white,
                                     child: SizedBox(
                                       height: 4.h,
                                       width: 4.h,
                                       child: Center(
-                                        child: _isFavorite
-                                            ? const Icon(
+                                        child: _isFavoriteBest[index]
+                                            ? Icon(
                                           Icons.favorite_rounded,
-                                          color: Color.fromRGBO(176, 176, 176, 1),
+                                          size: 17.sp,
+                                          color: Colors.red,
                                         )
-                                            : const Icon(
+                                            : Icon(
                                           Icons.favorite_rounded,
-                                          color: Colors
-                                              .red, // Color.fromRGBO(176, 176, 176, 1),
+                                          size: 17.sp,
+                                          color: const Color.fromRGBO(
+                                              176, 176, 176, 1),
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
+                              ):
+                              Container(),
                               Positioned(
                                 top: 6.h,
                                 //left: 0,
