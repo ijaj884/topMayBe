@@ -230,6 +230,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                         size: 18.sp,
                       ),
                     ),
+                    //CartIconWidget(),
                   ],
                 ),
                 body: ListView(

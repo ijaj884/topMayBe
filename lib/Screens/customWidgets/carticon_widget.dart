@@ -31,7 +31,7 @@ class _CartIconWidgetState extends State<CartIconWidget> {
   Future<void> createSharedPref() async {
     prefs = await SharedPreferences.getInstance();
     // print("cartId at Cart page1" + prefs.getString("cart_id"));
-    cart_id = prefs.getString("cart_id")!;
+    //cart_id = prefs.getString("cart_id")!;
     user_id = prefs.getString("user_id")!;
     coupon_code = prefs.getString("coupon_code")!;
     _getCartRepository =GetCartRepository();

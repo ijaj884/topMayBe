@@ -7,7 +7,10 @@ import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
 import 'package:topmaybe/Screens/ProductList/product_list_allrepository.dart';
 
+import '../../api_base/api_response.dart';
 import '../../constant.dart';
+import '../CartPage/SetCart/SetCartBloc.dart';
+import '../CartPage/SetCart/setcart_model.dart';
 import '../CartPage/cart_page.dart';
 import '../HomeScreen/GetAllActiveDeals/new_arrival_model.dart';
 import '../ProductDetails/product_details.dart';
@@ -39,6 +42,8 @@ class _ProductListState extends State<ProductList> {
   late SharedPreferences prefs;
   final List<bool> _isFavoriteBest = [];
   final FavoriteAddBloc _favoriteAddBloc = FavoriteAddBloc();
+  bool setCart=false;
+  final SetCartBloc _setCartBloc=SetCartBloc();
 
   Future<void> createSharedPref() async {
 
@@ -62,6 +67,9 @@ class _ProductListState extends State<ProductList> {
       }
       else if(widget.varName=="Recently Viewed"){
         _getNewArrival = _getAllActiveDealsRepository.getRecentlyViewed(userId);
+      }
+      else if(widget.varName=="Suggested for you"){
+        _getNewArrival = _getAllActiveDealsRepository.getSuggestedForYou(userId);
       }
 
     }
@@ -601,7 +609,7 @@ class _ProductListState extends State<ProductList> {
             future: _getNewArrival,
             builder: (context,snapshot){
               if(snapshot.hasData){
-               if(widget.varName !="Recently Viewed"){
+               if(widget.varName !="Recently Viewed" && widget.varName !="Suggested for you"){
                  for (int i = 0; i < snapshot.data!.Data!.length; i++) {
                    _isFavoriteBest.add(snapshot.data!.Data![i]!.isAddedToWishList!);
                  }
@@ -799,7 +807,7 @@ class _ProductListState extends State<ProductList> {
                                   ),
                                 ),
                               ),
-                              widget.varName !="Recently Viewed" ?
+                              widget.varName !="Recently Viewed" &&  widget.varName !="Suggested for you"?
                               Positioned(
                                 top: 0,
                                 //left: 0,
@@ -857,25 +865,97 @@ class _ProductListState extends State<ProductList> {
                                 right: 0,
                                 child: InkWell(
                                   onTap: () {
-                                    Get.to(() => const CartPage());
+                                    setCart=true;
+                                    Map body ={
+                                      "cart_cus_id": userId,
+                                      "cart_seller_id": "${snapshot.data!.Data![index]!.iskuId}",
+                                      "cart_itm_id": "${snapshot.data!.Data![index]!.iskuItmId}",
+                                      "cart_isku_id": "${snapshot.data!.Data![index]!.iskuId!}",
+                                      "cart_qty": "1"
+                                    };
+                                    _setCartBloc.setCart(body);
+                                    //Get.to(() => const CartPage());
                                   },
-                                  child: Card(
-                                    elevation: 10,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius. circular(20),
-                                    ),
-                                    color: Colors.white,
-                                    child: SizedBox(
-                                      height: 4.h,
-                                      width: 4.h,
-                                      child: const Center(
-                                        child:  Icon(
-                                          Icons.shopping_cart,
-                                          color: Color.fromRGBO(176, 176, 176, 1),
+                                  child: StreamBuilder<ApiResponse<SetCartModel>>(
+                                    stream: _setCartBloc.setCartStream,
+                                    builder: (context, snapshot2) {
+                                      if (snapshot2.hasData) {
+                                        switch (snapshot2.data!.status) {
+                                          case Status.LOADING:
+                                          // return const CircularProgressIndicator(
+                                          //     backgroundColor: Colors.white,
+                                          //     strokeWidth: 3,
+                                          //     valueColor: AlwaysStoppedAnimation<Color>(
+                                          //         darkThemeOrange));
+
+                                            break;
+                                          case Status.COMPLETED:
+                                            {
+                                              if (setCart) {
+
+                                                if(snapshot2.data!.data.Code != 0){
+                                                  // managedSharedPref(snapshot2.data!.data);
+                                                  Future.delayed(Duration.zero, () {
+                                                    Get.to(() => const CartPage());
+
+                                                  });
+
+                                                }else{
+                                                  Fluttertoast.showToast(
+                                                      msg: "Something is wrong",
+                                                      fontSize: 14,
+                                                      backgroundColor: Colors.white,
+                                                      gravity: ToastGravity.CENTER,
+                                                      textColor: darkThemeBlue,
+                                                      toastLength: Toast.LENGTH_LONG);
+                                                }
+                                              }
+                                              setCart = false;
+
+                                            }
+                                            break;
+                                          case Status.ERROR:
+                                            if (kDebugMode) {
+                                              print(snapshot.error);
+                                              Fluttertoast.showToast(
+                                                  msg: "Something is wrong",
+                                                  fontSize: 14,
+                                                  backgroundColor: Colors.white,
+                                                  gravity: ToastGravity.CENTER,
+                                                  textColor: darkThemeBlue,
+                                                  toastLength: Toast.LENGTH_LONG);
+                                              //   Error(
+                                              //   errorMessage: snapshot.data.message,
+                                              // );
+
+                                            }
+                                            break;
+                                        }
+                                      } else if (snapshot.hasError) {
+                                        print("error");
+                                      }
+                                      return Card(
+                                        elevation: 10,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(20),
                                         ),
-                                      ),
-                                    ),
+                                        color: Colors.white,
+                                        child: SizedBox(
+                                          height: 4.h,
+                                          width: 4.h,
+                                          child: Center(
+                                            child: Icon(
+                                              Icons.shopping_cart,
+                                              size: 15.sp,
+                                              color:
+                                              const Color.fromRGBO(176, 176, 176, 1),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
                                   ),
+
                                 ),
                               ),
                             ]),

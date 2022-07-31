@@ -9,9 +9,12 @@ import 'dart:async';
 import 'package:geolocator/geolocator.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:topmaybe/Screens/ProductDetails/product_details.dart';
+import '../../api_base/api_response.dart';
 import '../../constant.dart';
 import 'dart:async';
 import '../BecomeAseller/become_a_seller.dart';
+import '../CartPage/SetCart/SetCartBloc.dart';
+import '../CartPage/SetCart/setcart_model.dart';
 import '../CartPage/cart_page.dart';
 import '../Login/login_page.dart';
 import '../MyAddress/manage_addresses.dart';
@@ -32,6 +35,8 @@ import 'GetMainCategoryModel/get_main_category_model.dart';
 import 'GetMainCategoryModel/get_main_category_repository.dart';
 import 'GetRecentlyViewed/get_recently_viewed.dart';
 import 'GetRecentlyViewed/get_recently_viewed_repository.dart';
+import 'GetSuggestedForYou/get_suggested_for_you_model.dart';
+import 'GetSuggestedForYou/get_suggested_for_you_repository.dart';
 import 'GetTopOffers/get_top_offers_model.dart';
 import 'GetTopOffers/get_top_offers_repository.dart';
 import 'GetUnderPrice/get_under_price_model.dart';
@@ -160,11 +165,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final GlobalKey<ScaffoldState> _key = GlobalKey();
   bool _isFavorite = true;
+  bool setCart=false;
+  final SetCartBloc _setCartBloc=SetCartBloc();
 
   final List<bool> _isFavoriteBest = [];
   final List<bool> _isFavoriteDeals = [];
   final List<bool> _isFavoriteNew = [];
   final List<bool> _isFavoriteRecentView = [];
+  final List<bool> _isSuggestedForYou = [];
+
   final FavoriteAddBloc _favoriteAddBloc = FavoriteAddBloc();
 
   @override
@@ -222,6 +231,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<GetRecentlyViewedModel>? _getRecentlyView;
   late GetRecentlyViewedRepository _getRecentlyViewedRepository;
 
+  Future<GetSuggestedForYouModel>? _getSuggestedForYou;
+  late GetSuggestedForYouRepository _getSuggestedForYouRepository;
+
   String userId = "0";
 
   Future<void> createSharedPref() async {
@@ -252,6 +264,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
     _getRecentlyViewedRepository = GetRecentlyViewedRepository();
     _getRecentlyView = _getRecentlyViewedRepository.getRecentlyViewed(userId);
+
+    _getSuggestedForYouRepository=GetSuggestedForYouRepository();
+    _getSuggestedForYou=_getSuggestedForYouRepository.getSuggestedForYou(userId);
 
     setState(() {});
   }
@@ -462,6 +477,50 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
             dealsOfDay(difference),
+            Container(
+              height: 3,
+              color: Colors.grey[100],
+            ),
+            Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(
+                      right: 8.0, left: 12, top: 8, bottom: 8),
+                  child: Text(
+                    "Suggested for you",
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13.sp,
+                        color: Colors.black),
+                  ),
+                ),
+
+                const Spacer(),
+                InkWell(
+                  onTap: (){
+                    Get.to(() => const ProductList(
+                      varName: "Suggested for you",
+                      categoryId: "0",
+                    ));
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(8.0),
+                    margin: const EdgeInsets.only(right: 10, left: 10, top: 8),
+                    height: 4.h,
+                    width: 17.w,
+                    color: darkThemeBlue,
+                    child: Text(
+                      "View all",
+                      style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 10.5.sp,
+                          color: Colors.white),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          suggestedforyou(difference),
             Container(
               height: 3,
               color: Colors.grey[100],
@@ -1475,8 +1534,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               padding: const EdgeInsets.all(8.0),
                               child: Center(
                                 child: FadeInImage(
-                                  image: NetworkImage(snapshot
-                                      .data!.Data![index]!.iskuImage_1!),
+                                  image: NetworkImage(snapshot.data!.Data![index]!.iskuImage_1!),
                                   width: 35.w,
                                   height: 20.h,
                                   placeholder:
@@ -1694,27 +1752,97 @@ class _HomeScreenState extends State<HomeScreen> {
                           right: 0,
                           child: InkWell(
                             onTap: () {
-                              Get.to(() => const CartPage());
+                              setCart=true;
+                              Map body ={
+                                "cart_cus_id": userId,
+                                "cart_seller_id": "${snapshot.data!.Data![index]!.sstkSellerId}",
+                                "cart_itm_id": "${snapshot.data!.Data![index]!.iskuItmId}",
+                                "cart_isku_id": "${snapshot.data!.Data![index]!.iskuId!}",
+                                "cart_qty": "1"
+                              };
+                              _setCartBloc.setCart(body);
+                              //Get.to(() => const CartPage());
                             },
-                            child: Card(
-                              elevation: 10,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              color: Colors.white,
-                              child: SizedBox(
-                                height: 4.h,
-                                width: 4.h,
-                                child: Center(
-                                  child: Icon(
-                                    Icons.shopping_cart,
-                                    size: 15.sp,
-                                    color:
-                                        const Color.fromRGBO(176, 176, 176, 1),
+                            child: StreamBuilder<ApiResponse<SetCartModel>>(
+                              stream: _setCartBloc.setCartStream,
+                              builder: (context, snapshot2) {
+                                if (snapshot2.hasData) {
+                                  switch (snapshot2.data!.status) {
+                                    case Status.LOADING:
+                                      // return const CircularProgressIndicator(
+                                      //     backgroundColor: Colors.white,
+                                      //     strokeWidth: 3,
+                                      //     valueColor: AlwaysStoppedAnimation<Color>(
+                                      //         darkThemeOrange));
+
+                                      break;
+                                    case Status.COMPLETED:
+                                      {
+                                        if (setCart) {
+
+                                          if(snapshot2.data!.data.Code != 0){
+                                            // managedSharedPref(snapshot2.data!.data);
+                                            Future.delayed(Duration.zero, () {
+                                              Get.to(() => const CartPage());
+
+                                            });
+
+                                          }else{
+                                            Fluttertoast.showToast(
+                                                msg: "Something is wrong",
+                                                fontSize: 14,
+                                                backgroundColor: Colors.white,
+                                                gravity: ToastGravity.CENTER,
+                                                textColor: darkThemeBlue,
+                                                toastLength: Toast.LENGTH_LONG);
+                                          }
+                                        }
+                                        setCart = false;
+
+                                      }
+                                      break;
+                                    case Status.ERROR:
+                                      if (kDebugMode) {
+                                        print(snapshot.error);
+                                        Fluttertoast.showToast(
+                                            msg: "Something is wrong",
+                                            fontSize: 14,
+                                            backgroundColor: Colors.white,
+                                            gravity: ToastGravity.CENTER,
+                                            textColor: darkThemeBlue,
+                                            toastLength: Toast.LENGTH_LONG);
+                                        //   Error(
+                                        //   errorMessage: snapshot.data.message,
+                                        // );
+
+                                      }
+                                      break;
+                                  }
+                                } else if (snapshot.hasError) {
+                                  print("error");
+                                }
+                                return Card(
+                                  elevation: 10,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
                                   ),
-                                ),
-                              ),
+                                  color: Colors.white,
+                                  child: SizedBox(
+                                    height: 4.h,
+                                    width: 4.h,
+                                    child: Center(
+                                      child: Icon(
+                                        Icons.shopping_cart,
+                                        size: 15.sp,
+                                        color:
+                                        const Color.fromRGBO(176, 176, 176, 1),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
+
                           ),
                         ),
                       ]),
@@ -1739,6 +1867,394 @@ class _HomeScreenState extends State<HomeScreen> {
                 darkThemeOrange,
               ),
             ));
+          }
+        },
+      ),
+    );
+  }
+
+  bestseller(Duration difference) {
+    return SizedBox(
+      height: 42.0.h,
+      child: FutureBuilder<GetBestSellerModel>(
+        future: _getBestSeller,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            // if(snapshot.data!.Data!.ItemByPrice1 !=null){
+            //   itemByPrice.add(snapshot.data!.Data!.ItemByPrice1!.toString());
+            //   itemByPrice.add(snapshot.data!.Data!.ItemByPrice2!.toString());
+            // }
+            for (int i = 0; i < snapshot.data!.Data!.length; i++) {
+              _isFavoriteBest.add(snapshot.data!.Data![i]!.isAddedToWishList!);
+            }
+            return ListView.builder(
+              //padding: EdgeInsets.only(top: 8, bottom: 0, left: 4.0.w, right: 4.0.w),
+              scrollDirection: Axis.horizontal,
+              shrinkWrap: true,
+              physics: const AlwaysScrollableScrollPhysics(),
+              itemCount: snapshot.data!.Data!.length,
+              itemBuilder: (context, index) {
+                //print("issssssssss ffffffffffffffaaaaaaa $_isFavoriteBest");
+
+                return InkWell(
+                  onTap: () {
+                    Get.to(() => ProductDetails(
+                      itemId:
+                      snapshot.data!.Data![index]!.iskuItmId.toString(),
+                      iskuOfferPrice: snapshot
+                          .data!.Data![index]!.iskuOfferPrice
+                          .toString(),
+                      iskuMrp:
+                      snapshot.data!.Data![index]!.iskuMrp.toString(),
+                      iskuId:
+                      snapshot.data!.Data![index]!.iskuId.toString(),
+                    ));
+                  },
+                  child: Card(
+                    elevation: 0,
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 0.475,
+                      padding: const EdgeInsets.all(0),
+                      //margin: EdgeInsets.only(left: 8),
+                      child: Stack(children: <Widget>[
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Center(
+                                child: FadeInImage(
+                                  image: NetworkImage(snapshot
+                                      .data!.Data![index]!.iskuImage_1!),
+                                  width: 35.w,
+                                  height: 20.h,
+                                  placeholder:
+                                  const AssetImage("images/headphone.jpg"),
+                                  fit: BoxFit.fill,
+                                ),
+                              ),
+                              // Image.asset(
+                              //   headphoneImages[index],
+                              //   fit: BoxFit.fill,
+                              //   width: 35.w,
+                              //   height: 18.h,
+                              // ),
+                            ),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.timer,
+                                  color: Colors.red,
+                                  size: 18.sp,
+                                ),
+                                const SizedBox(
+                                  width: 8,
+                                ),
+                                Center(
+                                    child: Text(
+                                      "${difference.inHours} : ${difference.inMinutes.remainder(60)} : ${difference.inSeconds.remainder(60)}",
+                                      style: TextStyle(
+                                          color: Colors.black, fontSize: 12.sp),
+                                    )),
+                                //Center(child: Text("00:$_start",style: TextStyle(color: Colors.black, fontSize: 16),)),
+                              ],
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                snapshot.data!.Data![index]!.itmName!,
+                                //"boAt Rockerz 510 Super Extra Bass Bluetooth headphone",
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                    fontSize: 11.sp, color: darkThemeBlue),
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                Container(
+                                  margin: const EdgeInsets.only(left: 8),
+                                  padding: const EdgeInsets.only(left: 5),
+                                  height: 3.5.h,
+                                  width: 19.w,
+                                  decoration: BoxDecoration(
+                                      color: Colors.green,
+                                      borderRadius: BorderRadius.circular(
+                                          5) // use instead of BorderRadius.all(Radius.circular(20))
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.star,
+                                        color: Colors.white,
+                                        size: 11.sp,
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                            left: 5.0, top: 1),
+                                        child: Text(
+                                          "4.5 Star",
+                                          style: TextStyle(
+                                              fontSize: 8.5.sp,
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(
+                                  width: 5,
+                                ),
+                                Icon(
+                                  Icons.share_outlined,
+                                  color: darkThemeBlue,
+                                  size: 14.sp,
+                                ),
+                                Padding(
+                                  padding:
+                                  const EdgeInsets.only(left: 5.0, top: 3),
+                                  child: Text(
+                                    "Share",
+                                    style: TextStyle(
+                                      fontSize: 10.sp,
+                                      color: darkThemeBlue,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Padding(
+                                  padding:
+                                  const EdgeInsets.only(left: 8.0, top: 8),
+                                  child: Text(
+                                    " \u20B9 ${snapshot.data!.Data![index]!.iskuOfferPrice!}",
+                                    style: TextStyle(
+                                        fontSize: 14.sp,
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.w500),
+                                  ),
+                                ),
+                                Padding(
+                                  padding:
+                                  const EdgeInsets.only(left: 12.0, top: 8),
+                                  child: Text(
+                                    " \u20B9 ${snapshot.data!.Data![index]!.iskuMrp!}",
+                                    style: TextStyle(
+                                      fontSize: 11.sp,
+                                      color: Colors.black,
+                                      decoration: TextDecoration.lineThrough,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        Positioned(
+                          top: 0,
+                          left: 0,
+                          //right: 0,
+                          child: ClipOval(
+                            child: Container(
+                              padding: const EdgeInsets.all(3),
+                              width: 4.5.h,
+                              height: 4.5.h,
+                              decoration: const BoxDecoration(
+                                  color: Color.fromRGBO(
+                                      202, 85, 44, 1) //(202, 85, 44)
+                              ),
+                              child: Center(
+                                child: Text(
+                                  "45%",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontStyle: FontStyle.normal,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 10.sp,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          top: 0,
+                          //left: 0,
+                          right: 0,
+                          child: InkWell(
+                            onTap: () {
+                              if (_isFavoriteBest[index] != true) {
+                                Map body = {
+                                  "wl_cus_id": userId,
+                                  "wl_itm_id":
+                                  snapshot.data!.Data![index]!.iskuItmId,
+                                  "wl_isku_id":
+                                  snapshot.data!.Data![index]!.iskuId
+                                };
+                                _favoriteAddBloc.favoriteAdd(body);
+                                _isFavoriteBest[index] =
+                                !_isFavoriteBest[index];
+                                Fluttertoast.showToast(
+                                    msg: "Successfully Added to Wishlist",
+                                    fontSize: 14,
+                                    backgroundColor: Colors.white,
+                                    gravity: ToastGravity.BOTTOM,
+                                    textColor: darkThemeBlue,
+                                    toastLength: Toast.LENGTH_LONG);
+                              }
+                            },
+                            child: Card(
+                              elevation: 10,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              color: Colors.white,
+                              child: SizedBox(
+                                height: 4.h,
+                                width: 4.h,
+                                child: Center(
+                                  child: _isFavoriteBest[index]
+                                      ? Icon(
+                                    Icons.favorite_rounded,
+                                    size: 17.sp,
+                                    color: Colors.red,
+                                  )
+                                      : Icon(
+                                    Icons.favorite_rounded,
+                                    size: 17.sp,
+                                    color: const Color.fromRGBO(
+                                        176, 176, 176, 1),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          top: 6.h,
+                          //left: 0,
+                          right: 0,
+                          child: InkWell(
+                            onTap: () {
+                              setCart=true;
+                              Map body ={
+                                "cart_cus_id": userId,
+                                "cart_seller_id": "${snapshot.data!.Data![index]!.sstkSellerId}",
+                                "cart_itm_id": "${snapshot.data!.Data![index]!.iskuItmId}",
+                                "cart_isku_id": "${snapshot.data!.Data![index]!.iskuId!}",
+                                "cart_qty": "1"
+                              };
+                              _setCartBloc.setCart(body);
+                              //Get.to(() => const CartPage());
+                            },
+                            child: StreamBuilder<ApiResponse<SetCartModel>>(
+                              stream: _setCartBloc.setCartStream,
+                              builder: (context, snapshot2) {
+                                if (snapshot2.hasData) {
+                                  switch (snapshot2.data!.status) {
+                                    case Status.LOADING:
+                                    // return const CircularProgressIndicator(
+                                    //     backgroundColor: Colors.white,
+                                    //     strokeWidth: 3,
+                                    //     valueColor: AlwaysStoppedAnimation<Color>(
+                                    //         darkThemeOrange));
+
+                                      break;
+                                    case Status.COMPLETED:
+                                      {
+                                        if (setCart) {
+
+                                          if(snapshot2.data!.data.Code != 0){
+                                            // managedSharedPref(snapshot2.data!.data);
+                                            Future.delayed(Duration.zero, () {
+                                              Get.to(() => const CartPage());
+
+                                            });
+
+                                          }else{
+                                            Fluttertoast.showToast(
+                                                msg: "Something is wrong",
+                                                fontSize: 14,
+                                                backgroundColor: Colors.white,
+                                                gravity: ToastGravity.CENTER,
+                                                textColor: darkThemeBlue,
+                                                toastLength: Toast.LENGTH_LONG);
+                                          }
+                                        }
+                                        setCart = false;
+
+                                      }
+                                      break;
+                                    case Status.ERROR:
+                                      if (kDebugMode) {
+                                        print(snapshot.error);
+                                        Fluttertoast.showToast(
+                                            msg: "Something is wrong",
+                                            fontSize: 14,
+                                            backgroundColor: Colors.white,
+                                            gravity: ToastGravity.CENTER,
+                                            textColor: darkThemeBlue,
+                                            toastLength: Toast.LENGTH_LONG);
+                                        //   Error(
+                                        //   errorMessage: snapshot.data.message,
+                                        // );
+
+                                      }
+                                      break;
+                                  }
+                                } else if (snapshot.hasError) {
+                                  print("error");
+                                }
+                                return Card(
+                                  elevation: 10,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  color: Colors.white,
+                                  child: SizedBox(
+                                    height: 4.h,
+                                    width: 4.h,
+                                    child: Center(
+                                      child: Icon(
+                                        Icons.shopping_cart,
+                                        size: 15.sp,
+                                        color:
+                                        const Color.fromRGBO(176, 176, 176, 1),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+
+                          ),
+                        ),
+                      ]),
+                    ),
+                  ),
+                );
+              },
+            );
+          } else if (snapshot.hasError) {
+            print("hello");
+            return Container(
+              child: const Center(
+                  child: Text(
+                    "No Data ",
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                  )),
+            );
+          } else {
+            return const Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    darkThemeOrange,
+                  ),
+                ));
           }
         },
       ),
@@ -1852,20 +2368,16 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  bestseller(Duration difference) {
+  suggestedforyou(Duration difference) {
     return SizedBox(
       height: 42.0.h,
-      child: FutureBuilder<GetBestSellerModel>(
-        future: _getBestSeller,
+      child: FutureBuilder<GetSuggestedForYouModel>(
+        future: _getSuggestedForYou,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            // if(snapshot.data!.Data!.ItemByPrice1 !=null){
-            //   itemByPrice.add(snapshot.data!.Data!.ItemByPrice1!.toString());
-            //   itemByPrice.add(snapshot.data!.Data!.ItemByPrice2!.toString());
+            // for (int i = 0; i < snapshot.data!.Data!.length; i++) {
+            //   _isSuggestedForYou.add(snapshot.data!.Data![i]!.isAddedToWishList!);
             // }
-            for (int i = 0; i < snapshot.data!.Data!.length; i++) {
-              _isFavoriteBest.add(snapshot.data!.Data![i]!.isAddedToWishList!);
-            }
             return ListView.builder(
               //padding: EdgeInsets.only(top: 8, bottom: 0, left: 4.0.w, right: 4.0.w),
               scrollDirection: Axis.horizontal,
@@ -1879,7 +2391,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   onTap: () {
                     Get.to(() => ProductDetails(
                           itemId:
-                              snapshot.data!.Data![index]!.iskuItmId.toString(),
+                              snapshot.data!.Data![index]!.itmId.toString(),
                           iskuOfferPrice: snapshot
                               .data!.Data![index]!.iskuOfferPrice
                               .toString(),
@@ -2060,86 +2572,156 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                         ),
-                        Positioned(
-                          top: 0,
-                          //left: 0,
-                          right: 0,
-                          child: InkWell(
-                            onTap: () {
-                              if (_isFavoriteBest[index] != true) {
-                                Map body = {
-                                  "wl_cus_id": userId,
-                                  "wl_itm_id":
-                                      snapshot.data!.Data![index]!.iskuItmId,
-                                  "wl_isku_id":
-                                      snapshot.data!.Data![index]!.iskuId
-                                };
-                                _favoriteAddBloc.favoriteAdd(body);
-                                _isFavoriteBest[index] =
-                                    !_isFavoriteBest[index];
-                                Fluttertoast.showToast(
-                                    msg: "Successfully Added to Wishlist",
-                                    fontSize: 14,
-                                    backgroundColor: Colors.white,
-                                    gravity: ToastGravity.BOTTOM,
-                                    textColor: darkThemeBlue,
-                                    toastLength: Toast.LENGTH_LONG);
-                              }
-                            },
-                            child: Card(
-                              elevation: 10,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              color: Colors.white,
-                              child: SizedBox(
-                                height: 4.h,
-                                width: 4.h,
-                                child: Center(
-                                  child: _isFavoriteBest[index]
-                                      ? Icon(
-                                          Icons.favorite_rounded,
-                                          size: 17.sp,
-                                          color: Colors.red,
-                                        )
-                                      : Icon(
-                                          Icons.favorite_rounded,
-                                          size: 17.sp,
-                                          color: const Color.fromRGBO(
-                                              176, 176, 176, 1),
-                                        ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
+                        // Positioned(
+                        //   top: 0,
+                        //   //left: 0,
+                        //   right: 0,
+                        //   child: InkWell(
+                        //     onTap: () {
+                        //       if (_isSuggestedForYou[index] != true) {
+                        //         Map body = {
+                        //           "wl_cus_id": userId,
+                        //           "wl_itm_id":
+                        //               snapshot.data!.Data![index]!.itmId,
+                        //           "wl_isku_id":
+                        //               snapshot.data!.Data![index]!.iskuId
+                        //         };
+                        //         _favoriteAddBloc.favoriteAdd(body);
+                        //         _isFavoriteBest[index] =
+                        //             !_isFavoriteBest[index];
+                        //         Fluttertoast.showToast(
+                        //             msg: "Successfully Added to Wishlist",
+                        //             fontSize: 14,
+                        //             backgroundColor: Colors.white,
+                        //             gravity: ToastGravity.BOTTOM,
+                        //             textColor: darkThemeBlue,
+                        //             toastLength: Toast.LENGTH_LONG);
+                        //       }
+                        //     },
+                        //     child: Card(
+                        //       elevation: 10,
+                        //       shape: RoundedRectangleBorder(
+                        //         borderRadius: BorderRadius.circular(20),
+                        //       ),
+                        //       color: Colors.white,
+                        //       child: SizedBox(
+                        //         height: 4.h,
+                        //         width: 4.h,
+                        //         child: Center(
+                        //           child: _isFavoriteBest[index]
+                        //               ? Icon(
+                        //                   Icons.favorite_rounded,
+                        //                   size: 17.sp,
+                        //                   color: Colors.red,
+                        //                 )
+                        //               : Icon(
+                        //                   Icons.favorite_rounded,
+                        //                   size: 17.sp,
+                        //                   color: const Color.fromRGBO(
+                        //                       176, 176, 176, 1),
+                        //                 ),
+                        //         ),
+                        //       ),
+                        //     ),
+                        //   ),
+                        // ),
                         Positioned(
                           top: 6.h,
                           //left: 0,
                           right: 0,
                           child: InkWell(
                             onTap: () {
-                              Get.to(() => const CartPage());
+                              setCart=true;
+                              Map body ={
+                                "cart_cus_id": userId,
+                                "cart_seller_id": "${snapshot.data!.Data![index]!.iskuId}",
+                                "cart_itm_id": "${snapshot.data!.Data![index]!.itmId}",
+                                "cart_isku_id": "${snapshot.data!.Data![index]!.iskuId!}",
+                                "cart_qty": "1"
+                              };
+                              _setCartBloc.setCart(body);
+                              //Get.to(() => const CartPage());
                             },
-                            child: Card(
-                              elevation: 10,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              color: Colors.white,
-                              child: SizedBox(
-                                height: 4.h,
-                                width: 4.h,
-                                child: Center(
-                                  child: Icon(
-                                    Icons.shopping_cart,
-                                    size: 15.sp,
-                                    color:
-                                        const Color.fromRGBO(176, 176, 176, 1),
+                            child: StreamBuilder<ApiResponse<SetCartModel>>(
+                              stream: _setCartBloc.setCartStream,
+                              builder: (context, snapshot2) {
+                                if (snapshot2.hasData) {
+                                  switch (snapshot2.data!.status) {
+                                    case Status.LOADING:
+                                      // return const CircularProgressIndicator(
+                                      //     backgroundColor: Colors.white,
+                                      //     strokeWidth: 3,
+                                      //     valueColor: AlwaysStoppedAnimation<Color>(
+                                      //         darkThemeOrange));
+
+                                      break;
+                                    case Status.COMPLETED:
+                                      {
+                                        if (setCart) {
+
+                                          if(snapshot2.data!.data.Code != 0){
+                                            // managedSharedPref(snapshot2.data!.data);
+                                            Future.delayed(Duration.zero, () {
+                                              Get.to(() => const CartPage());
+
+                                            });
+
+                                          }else{
+                                            Fluttertoast.showToast(
+                                                msg: "Something is wrong",
+                                                fontSize: 14,
+                                                backgroundColor: Colors.white,
+                                                gravity: ToastGravity.CENTER,
+                                                textColor: darkThemeBlue,
+                                                toastLength: Toast.LENGTH_LONG);
+                                          }
+                                        }
+                                        setCart = false;
+
+                                      }
+                                      break;
+                                    case Status.ERROR:
+                                      if (kDebugMode) {
+                                        print(snapshot.error);
+                                        Fluttertoast.showToast(
+                                            msg: "Something is wrong",
+                                            fontSize: 14,
+                                            backgroundColor: Colors.white,
+                                            gravity: ToastGravity.CENTER,
+                                            textColor: darkThemeBlue,
+                                            toastLength: Toast.LENGTH_LONG);
+                                        //   Error(
+                                        //   errorMessage: snapshot.data.message,
+                                        // );
+
+                                      }
+                                      break;
+                                  }
+                                } else if (snapshot.hasError) {
+                                  print("error");
+                                }
+                                return Card(
+                                  elevation: 10,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
                                   ),
-                                ),
-                              ),
+                                  color: Colors.white,
+                                  child: SizedBox(
+                                    height: 4.h,
+                                    width: 4.h,
+                                    child: Center(
+                                      child: Icon(
+                                        Icons.shopping_cart,
+                                        size: 15.sp,
+                                        color:
+                                        const Color.fromRGBO(176, 176, 176, 1),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
+
                           ),
                         ),
                       ]),
@@ -2431,27 +3013,97 @@ class _HomeScreenState extends State<HomeScreen> {
                           right: 0,
                           child: InkWell(
                             onTap: () {
-                              Get.to(() => const CartPage());
+                              setCart=true;
+                              Map body ={
+                                "cart_cus_id": userId,
+                                "cart_seller_id": "${snapshot.data!.Data![index]!.sstkSellerId}",
+                                "cart_itm_id": "${snapshot.data!.Data![index]!.iskuItmId}",
+                                "cart_isku_id": "${snapshot.data!.Data![index]!.iskuId!}",
+                                "cart_qty": "1"
+                              };
+                              _setCartBloc.setCart(body);
+                              //Get.to(() => const CartPage());
                             },
-                            child: Card(
-                              elevation: 10,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              color: Colors.white,
-                              child: SizedBox(
-                                height: 4.h,
-                                width: 4.h,
-                                child: Center(
-                                  child: Icon(
-                                    Icons.shopping_cart,
-                                    size: 15.sp,
-                                    color:
-                                        const Color.fromRGBO(176, 176, 176, 1),
+                            child: StreamBuilder<ApiResponse<SetCartModel>>(
+                              stream: _setCartBloc.setCartStream,
+                              builder: (context, snapshot2) {
+                                if (snapshot2.hasData) {
+                                  switch (snapshot2.data!.status) {
+                                    case Status.LOADING:
+                                      // return const CircularProgressIndicator(
+                                      //     backgroundColor: Colors.white,
+                                      //     strokeWidth: 3,
+                                      //     valueColor: AlwaysStoppedAnimation<Color>(
+                                      //         darkThemeOrange));
+
+                                      break;
+                                    case Status.COMPLETED:
+                                      {
+                                        if (setCart) {
+
+                                          if(snapshot2.data!.data.Code != 0){
+                                            // managedSharedPref(snapshot2.data!.data);
+                                            Future.delayed(Duration.zero, () {
+                                              Get.to(() => const CartPage());
+
+                                            });
+
+                                          }else{
+                                            Fluttertoast.showToast(
+                                                msg: "Something is wrong",
+                                                fontSize: 14,
+                                                backgroundColor: Colors.white,
+                                                gravity: ToastGravity.CENTER,
+                                                textColor: darkThemeBlue,
+                                                toastLength: Toast.LENGTH_LONG);
+                                          }
+                                        }
+                                        setCart = false;
+
+                                      }
+                                      break;
+                                    case Status.ERROR:
+                                      if (kDebugMode) {
+                                        print(snapshot.error);
+                                        Fluttertoast.showToast(
+                                            msg: "Something is wrong",
+                                            fontSize: 14,
+                                            backgroundColor: Colors.white,
+                                            gravity: ToastGravity.CENTER,
+                                            textColor: darkThemeBlue,
+                                            toastLength: Toast.LENGTH_LONG);
+                                        //   Error(
+                                        //   errorMessage: snapshot.data.message,
+                                        // );
+
+                                      }
+                                      break;
+                                  }
+                                } else if (snapshot.hasError) {
+                                  print("error");
+                                }
+                                return Card(
+                                  elevation: 10,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
                                   ),
-                                ),
-                              ),
+                                  color: Colors.white,
+                                  child: SizedBox(
+                                    height: 4.h,
+                                    width: 4.h,
+                                    child: Center(
+                                      child: Icon(
+                                        Icons.shopping_cart,
+                                        size: 15.sp,
+                                        color:
+                                        const Color.fromRGBO(176, 176, 176, 1),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
+
                           ),
                         ),
                       ]),
@@ -2787,27 +3439,97 @@ class _HomeScreenState extends State<HomeScreen> {
                                   right: 0,
                                   child: InkWell(
                                     onTap: () {
-                                      Get.to(() => const CartPage());
+                                      setCart=true;
+                                      Map body ={
+                                        "cart_cus_id": userId,
+                                        "cart_seller_id": "${snapshot.data!.Data![index]!.iskuId}",
+                                        "cart_itm_id": "${snapshot.data!.Data![index]!.itmId}",
+                                        "cart_isku_id": "${snapshot.data!.Data![index]!.iskuId!}",
+                                        "cart_qty": "1"
+                                      };
+                                      _setCartBloc.setCart(body);
+                                      //Get.to(() => const CartPage());
                                     },
-                                    child: Card(
-                                      elevation: 10,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      color: Colors.white,
-                                      child: SizedBox(
-                                        height: 4.h,
-                                        width: 4.h,
-                                        child: Center(
-                                          child: Icon(
-                                            Icons.shopping_cart,
-                                            size: 15.sp,
-                                            color: const Color.fromRGBO(
-                                                176, 176, 176, 1),
+                                    child: StreamBuilder<ApiResponse<SetCartModel>>(
+                                      stream: _setCartBloc.setCartStream,
+                                      builder: (context, snapshot2) {
+                                        if (snapshot2.hasData) {
+                                          switch (snapshot2.data!.status) {
+                                            case Status.LOADING:
+                                              // return const CircularProgressIndicator(
+                                              //     backgroundColor: Colors.white,
+                                              //     strokeWidth: 3,
+                                              //     valueColor: AlwaysStoppedAnimation<Color>(
+                                              //         darkThemeOrange));
+
+                                              break;
+                                            case Status.COMPLETED:
+                                              {
+                                                if (setCart) {
+
+                                                  if(snapshot2.data!.data.Code != 0){
+                                                    // managedSharedPref(snapshot2.data!.data);
+                                                    Future.delayed(Duration.zero, () {
+                                                      Get.to(() => const CartPage());
+
+                                                    });
+
+                                                  }else{
+                                                    Fluttertoast.showToast(
+                                                        msg: "Something is wrong",
+                                                        fontSize: 14,
+                                                        backgroundColor: Colors.white,
+                                                        gravity: ToastGravity.CENTER,
+                                                        textColor: darkThemeBlue,
+                                                        toastLength: Toast.LENGTH_LONG);
+                                                  }
+                                                }
+                                                setCart = false;
+
+                                              }
+                                              break;
+                                            case Status.ERROR:
+                                              if (kDebugMode) {
+                                                print(snapshot.error);
+                                                Fluttertoast.showToast(
+                                                    msg: "Something is wrong",
+                                                    fontSize: 14,
+                                                    backgroundColor: Colors.white,
+                                                    gravity: ToastGravity.CENTER,
+                                                    textColor: darkThemeBlue,
+                                                    toastLength: Toast.LENGTH_LONG);
+                                                //   Error(
+                                                //   errorMessage: snapshot.data.message,
+                                                // );
+
+                                              }
+                                              break;
+                                          }
+                                        } else if (snapshot.hasError) {
+                                          print("error");
+                                        }
+                                        return Card(
+                                          elevation: 10,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(20),
                                           ),
-                                        ),
-                                      ),
+                                          color: Colors.white,
+                                          child: SizedBox(
+                                            height: 4.h,
+                                            width: 4.h,
+                                            child: Center(
+                                              child: Icon(
+                                                Icons.shopping_cart,
+                                                size: 15.sp,
+                                                color:
+                                                const Color.fromRGBO(176, 176, 176, 1),
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      },
                                     ),
+
                                   ),
                                 ),
                               ]),

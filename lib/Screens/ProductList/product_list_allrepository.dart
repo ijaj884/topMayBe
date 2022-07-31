@@ -31,5 +31,10 @@ class ProductListRepository{
     final response= await _apiBaseHelper.post("CusApi/ItemSku/GetRecentlyViewed/$userId", body);
     return NewArrivalModel.fromJson(response);
   }
+  Future<NewArrivalModel> getSuggestedForYou(String userId) async{
+    Map body={};
+    final response= await _apiBaseHelper.post("CusApi/ItemSku/GetSuggestedForYou/$userId", body);
+    return NewArrivalModel.fromJson(response);
+  }
 
 }
