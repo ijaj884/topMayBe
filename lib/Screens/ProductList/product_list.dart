@@ -13,6 +13,8 @@ import '../CartPage/SetCart/SetCartBloc.dart';
 import '../CartPage/SetCart/setcart_model.dart';
 import '../CartPage/cart_page.dart';
 import '../HomeScreen/GetAllActiveDeals/new_arrival_model.dart';
+import '../Login/login_page.dart';
+import '../MyAddress/address_list_page.dart';
 import '../ProductDetails/product_details.dart';
 import '../WishList/WishListAdded/FavoriteAddBloc.dart';
 // ignore: must_be_immutable
@@ -37,7 +39,7 @@ class _ProductListState extends State<ProductList> {
   // late GetFilteredItemListRepository _getFilteredItemListRepository;
   Future<NewArrivalModel>? _getNewArrival;
   late ProductListRepository _getAllActiveDealsRepository;
-  String userId="0";
+  String ? userId="0";
   final GlobalKey<ScaffoldState> _key = GlobalKey();
   late SharedPreferences prefs;
   final List<bool> _isFavoriteBest = [];
@@ -50,29 +52,33 @@ class _ProductListState extends State<ProductList> {
 
     prefs = await SharedPreferences.getInstance();
     if (userLogin) {
-      userId = prefs.getString("user_id")!;
+      userId = prefs.getString("user_id");
+    }
       _getAllActiveDealsRepository = ProductListRepository();
       if(widget.varName=="Best Seller"){
-        _getNewArrival = _getAllActiveDealsRepository.getBestSeller(userId);
+        _getNewArrival = _getAllActiveDealsRepository.getBestSeller(userId!);
       }
       else if(widget.varName=="Top Offers"){
-        _getNewArrival = _getAllActiveDealsRepository.getTopOfer(userId);
+        _getNewArrival = _getAllActiveDealsRepository.getTopOfer(userId!);
       }
       else if(widget.varName=="Deals of the day"){
-        _getNewArrival = _getAllActiveDealsRepository.getDealsOfTheDay(userId);
+        _getNewArrival = _getAllActiveDealsRepository.getDealsOfTheDay(userId!);
       }
       //New Arrival
       else if(widget.varName=="New Arrival"){
-        _getNewArrival = _getAllActiveDealsRepository.getNewArrival(userId);
+        _getNewArrival = _getAllActiveDealsRepository.getNewArrival(userId!);
       }
       else if(widget.varName=="Recently Viewed"){
-        _getNewArrival = _getAllActiveDealsRepository.getRecentlyViewed(userId);
+        _getNewArrival = _getAllActiveDealsRepository.getRecentlyViewed(userId!);
       }
       else if(widget.varName=="Suggested for you"){
-        _getNewArrival = _getAllActiveDealsRepository.getSuggestedForYou(userId);
+        _getNewArrival = _getAllActiveDealsRepository.getSuggestedForYou(userId!);
+      }
+      else if(widget.varName=="Featured Items"){
+        _getNewArrival = _getAllActiveDealsRepository.getFeatured(userId!);
       }
 
-    }
+
     setState(() {});
   }
   String wistList="";
@@ -865,15 +871,45 @@ class _ProductListState extends State<ProductList> {
                                 right: 0,
                                 child: InkWell(
                                   onTap: () {
-                                    setCart=true;
-                                    Map body ={
-                                      "cart_cus_id": userId,
-                                      "cart_seller_id": "${snapshot.data!.Data![index]!.iskuId}",
-                                      "cart_itm_id": "${snapshot.data!.Data![index]!.iskuItmId}",
-                                      "cart_isku_id": "${snapshot.data!.Data![index]!.iskuId!}",
-                                      "cart_qty": "1"
-                                    };
-                                    _setCartBloc.setCart(body);
+
+                                    if(userLogin){
+                                      setCart=true;
+                                      Map body ={
+                                        "cart_cus_id": userId,
+                                        "cart_seller_id": "${snapshot.data!.Data![index]!.iskuId}",
+                                        "cart_itm_id": "${snapshot.data!.Data![index]!.iskuItmId}",
+                                        "cart_isku_id": "${snapshot.data!.Data![index]!.iskuId!}",
+                                        "cart_qty": "1"
+                                      };
+                                      _setCartBloc.setCart(body);
+                                    }else{
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return AlertDialog(
+                                            title: const Text('Please Login to Continue'),
+                                            //content: const Text('Please Login to Continue'),
+                                            actions: <Widget>[
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.of(context, rootNavigator: true)
+                                                      .pop(false); // dismisses only the dialog and returns false
+                                                },
+                                                child: const Text('No'),
+                                              ),
+                                              TextButton(
+                                                onPressed: () {
+                                                  Get.to(() =>  const LoginPage());
+                                                },
+                                                child: const Text('Yes'),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    }
+
+
                                     //Get.to(() => const CartPage());
                                   },
                                   child: StreamBuilder<ApiResponse<SetCartModel>>(
@@ -896,7 +932,7 @@ class _ProductListState extends State<ProductList> {
                                                 if(snapshot2.data!.data.Code != 0){
                                                   // managedSharedPref(snapshot2.data!.data);
                                                   Future.delayed(Duration.zero, () {
-                                                    Get.to(() => const CartPage());
+                                                    Get.to(() => const AddressListPage());
 
                                                   });
 
@@ -932,7 +968,9 @@ class _ProductListState extends State<ProductList> {
                                             break;
                                         }
                                       } else if (snapshot.hasError) {
-                                        print("error");
+                                        if (kDebugMode) {
+                                          print("error");
+                                        }
                                       }
                                       return Card(
                                         elevation: 10,

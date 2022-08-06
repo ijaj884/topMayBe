@@ -9,6 +9,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:topmaybe/Screens/Login/login_page.dart';
 import 'package:topmaybe/Screens/ProductDetails/product_details_model.dart';
 import 'package:topmaybe/Screens/ProductDetails/product_details_repository.dart';
 import 'package:topmaybe/Screens/customWidgets/leanerprogressindicator.dart';
@@ -78,12 +79,12 @@ class _ProductDetailsState extends State<ProductDetails> {
   Future<GetItemReviewModel>? _getItemReview;
   late GetItemReviewRepository _getItemReviewRepository;
 
-  String userId="";
+  String ?userId="0";
   int ? value;
 
   Future<void> createSharedPref() async {
     prefs = await SharedPreferences.getInstance();
-    userId=prefs.getString("user_id")!;
+    userId=prefs.getString("user_id");
     if (kDebugMode) {
       print("User_______________________Id:---------------$userId");
     }
@@ -1332,376 +1333,434 @@ class _ProductDetailsState extends State<ProductDetails> {
                       ),
                      ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Ratings & Reviews",
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 17.sp,
-                                fontWeight: FontWeight.w600),
-                          ),
-                          const SizedBox(
-                            height: 8,
-                          ),
-                          Row(
+
+                    FutureBuilder<GetItemReviewModel>(
+                      future: _getItemReview,
+                      builder: (context, snapshot2) {
+                        if (snapshot2.hasData) {
+
+                          return Column(
                             children: [
-                              Expanded(
-                                flex: 2,
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
                                 child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Row(
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          "4.5/5 ",
-                                          style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 17.sp,
-                                              fontWeight: FontWeight.w600),
-                                        ),
-                                        Icon(
-                                          Icons.star,
-                                          size: 19.sp,
+                                    Text(
+                                      "Ratings & Reviews",
+                                      style: TextStyle(
                                           color: Colors.black,
+                                          fontSize: 17.sp,
+                                          fontWeight: FontWeight.w600),
+                                    ),
+                                    const SizedBox(
+                                      height: 8,
+                                    ),
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          flex: 2,
+                                          child: Column(
+                                            children: [
+                                              Row(
+                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  Text(
+                                                    "4.5/5 ",
+                                                    style: TextStyle(
+                                                        color: Colors.black,
+                                                        fontSize: 17.sp,
+                                                        fontWeight: FontWeight.w600),
+                                                  ),
+                                                  Icon(
+                                                    Icons.star,
+                                                    size: 19.sp,
+                                                    color: Colors.black,
+                                                  ),
+                                                ],
+                                              ),
+                                              Text(
+                                                "45 Rating &",
+                                                style: TextStyle(
+                                                    color: Colors.black,
+                                                    fontSize: 11.sp,
+                                                    fontWeight: FontWeight.w400),
+                                              ),
+                                              Text(
+                                                "35 Reviews",
+                                                style: TextStyle(
+                                                    color: Colors.black,
+                                                    fontSize: 11.sp,
+                                                    fontWeight: FontWeight.w400),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Expanded(
+                                          flex: 3,
+                                          child: Column(
+                                            children: <Widget>[
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    right: 8.0, left: 8, top: 8),
+                                                child: Row(
+                                                  children: [
+                                                    Text(
+                                                      "5 ",
+                                                      style: TextStyle(
+                                                          color: Colors.black,
+                                                          fontSize: 10.sp,
+                                                          fontWeight: FontWeight.w600),
+                                                    ),
+                                                    Icon(
+                                                      Icons.star,
+                                                      size: 9.sp,
+                                                      color: Colors.black,
+                                                    ),
+                                                    LinearPercentIndicator(
+                                                      width: 38.w,
+                                                      lineHeight: 6.0,
+                                                      percent: 0.8,
+                                                      barRadius: const Radius.circular(5),
+                                                      progressColor: Colors.green[600],
+                                                    ),
+                                                    Text(
+                                                      "20 ",
+                                                      style: TextStyle(
+                                                          color: Colors.black,
+                                                          fontSize: 12.sp,
+                                                          fontWeight: FontWeight.w400),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    right: 8.0, left: 8, top: 8),
+                                                child: Row(
+                                                  children: [
+                                                    Text(
+                                                      "4 ",
+                                                      style: TextStyle(
+                                                          color: Colors.black,
+                                                          fontSize: 10.sp,
+                                                          fontWeight: FontWeight.w600),
+                                                    ),
+                                                    Icon(
+                                                      Icons.star,
+                                                      size: 9.sp,
+                                                      color: Colors.black,
+                                                    ),
+                                                    LinearPercentIndicator(
+                                                      width: 38.w,
+                                                      lineHeight: 6.0,
+                                                      percent: 0.6,
+                                                      barRadius: const Radius.circular(5),
+                                                      progressColor: Colors.green[600],
+                                                    ),
+                                                    Text(
+                                                      "12 ",
+                                                      style: TextStyle(
+                                                          color: Colors.black,
+                                                          fontSize: 12.sp,
+                                                          fontWeight: FontWeight.w400),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    right: 8.0, left: 8, top: 8),
+                                                child: Row(
+                                                  children: [
+                                                    Text(
+                                                      "3 ",
+                                                      style: TextStyle(
+                                                          color: Colors.black,
+                                                          fontSize: 10.sp,
+                                                          fontWeight: FontWeight.w600),
+                                                    ),
+                                                    Icon(
+                                                      Icons.star,
+                                                      size: 9.sp,
+                                                      color: Colors.black,
+                                                    ),
+                                                    LinearPercentIndicator(
+                                                      width: 38.w,
+                                                      lineHeight: 6.0,
+                                                      percent: 0.5,
+                                                      barRadius: const Radius.circular(5),
+                                                      progressColor: Colors.green[600],
+                                                    ),
+                                                    Text(
+                                                      "8 ",
+                                                      style: TextStyle(
+                                                          color: Colors.black,
+                                                          fontSize: 12.sp,
+                                                          fontWeight: FontWeight.w400),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    right: 8.0, left: 8, top: 8),
+                                                child: Row(
+                                                  children: [
+                                                    Text(
+                                                      "2 ",
+                                                      style: TextStyle(
+                                                          color: Colors.black,
+                                                          fontSize: 10.sp,
+                                                          fontWeight: FontWeight.w600),
+                                                    ),
+                                                    Icon(
+                                                      Icons.star,
+                                                      size: 9.sp,
+                                                      color: Colors.black,
+                                                    ),
+                                                    LinearPercentIndicator(
+                                                      width: 38.w,
+                                                      lineHeight: 6.0,
+                                                      percent: 0.3,
+                                                      progressColor: Colors.yellow[700],
+                                                      barRadius: const Radius.circular(5),
+                                                    ),
+                                                    Text(
+                                                      "6 ",
+                                                      style: TextStyle(
+                                                          color: Colors.black,
+                                                          fontSize: 12.sp,
+                                                          fontWeight: FontWeight.w400),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    right: 8.0, left: 8, top: 8),
+                                                child: Row(
+                                                  children: [
+                                                    Text(
+                                                      "1 ",
+                                                      style: TextStyle(
+                                                          color: Colors.black,
+                                                          fontSize: 10.sp,
+                                                          fontWeight: FontWeight.w600),
+                                                    ),
+                                                    Icon(
+                                                      Icons.star,
+                                                      size: 9.sp,
+                                                      color: Colors.black,
+                                                    ),
+                                                    LinearPercentIndicator(
+                                                      width: 38.w,
+                                                      lineHeight: 6.0,
+                                                      percent: 0.2,
+                                                      barRadius: const Radius.circular(5),
+                                                      progressColor: Colors.red[600],
+                                                    ),
+                                                    Text(
+                                                      "3 ",
+                                                      style: TextStyle(
+                                                          color: Colors.black,
+                                                          fontSize: 12.sp,
+                                                          fontWeight: FontWeight.w400),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ],
                                     ),
-                                    Text(
-                                      "45 Rating &",
-                                      style: TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 11.sp,
-                                          fontWeight: FontWeight.w400),
-                                    ),
-                                    Text(
-                                      "35 Reviews",
-                                      style: TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 11.sp,
-                                          fontWeight: FontWeight.w400),
-                                    ),
                                   ],
                                 ),
                               ),
-                              Expanded(
-                                flex: 3,
-                                child: Column(
-                                  children: <Widget>[
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                          right: 8.0, left: 8, top: 8),
-                                      child: Row(
+                              ListView.builder(
+                                //padding: EdgeInsets.only(top: 8, bottom: 0, left: 4.0.w, right: 4.0.w),
+                                scrollDirection: Axis.vertical,
+                                padding: const EdgeInsets.all(10),
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+
+                                itemCount: snapshot2.data!.Data!.length,
+                                itemBuilder: (context, index) => InkWell(
+                                  onTap: () {
+                                    // Get.to(() => ProductByCategory(snapshot.data!.data![0]!.subcategory![index]!.id!));
+                                  },
+                                  child: Card(
+                                    elevation: 0.5,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Column(
                                         children: [
+                                          Row(
+                                            children: [
+                                              Container(
+                                                padding: const EdgeInsets.only(left: 5, right: 5),
+                                                height: 3.h,
+                                                //width: 19.w,
+                                                decoration: BoxDecoration(
+                                                    color: Colors.green,
+                                                    borderRadius: BorderRadius.circular(
+                                                        5) // use instead of BorderRadius.all(Radius.circular(20))
+                                                ),
+                                                child: Row(
+                                                  children: [
+                                                    Icon(
+                                                      Icons.star,
+                                                      color: Colors.white,
+                                                      size: 11.sp,
+                                                    ),
+                                                    Padding(
+                                                      padding:
+                                                      const EdgeInsets.only(left: 5.0, top: 1),
+                                                      child: Text(
+                                                        "${snapshot2.data!.Data![index]!.creviewRating}",
+                                                        style: TextStyle(
+                                                            fontSize: 8.5.sp,
+                                                            color: Colors.white,
+                                                            fontWeight: FontWeight.bold),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              const SizedBox(
+                                                width: 5,
+                                              ),
+                                              Padding(
+                                                padding: const EdgeInsets.only(left: 5.0, top: 3),
+                                                child: Text(
+                                                  "${snapshot2.data!.Data![index]!.creviewRemark}",
+                                                  style: TextStyle(
+                                                      fontSize: 13.sp,
+                                                      color: Colors.black,
+                                                      fontWeight: FontWeight.w600),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(
+                                            height: 8,
+                                          ),
                                           Text(
-                                            "5 ",
+                                            "Good built quality , not a headphone with immense sound..u can hear the songs in full volume for long time...nd most important one it has a very good looks.. overall a worth buying one in this price",
                                             style: TextStyle(
+                                                fontSize: 13.sp,
                                                 color: Colors.black,
-                                                fontSize: 10.sp,
-                                                fontWeight: FontWeight.w600),
-                                          ),
-                                          Icon(
-                                            Icons.star,
-                                            size: 9.sp,
-                                            color: Colors.black,
-                                          ),
-                                          LinearPercentIndicator(
-                                            width: 38.w,
-                                            lineHeight: 6.0,
-                                            percent: 0.8,
-                                            barRadius: const Radius.circular(5),
-                                            progressColor: Colors.green[600],
-                                          ),
-                                          Text(
-                                            "20 ",
-                                            style: TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 12.sp,
                                                 fontWeight: FontWeight.w400),
+                                          ),
+                                          const SizedBox(
+                                            height: 5,
+                                          ),
+                                          Row(
+                                            children: [
+                                              snapshot2.data!.Data![index]!.creviewImage1 !=""?
+                                              FadeInImage(
+                                                image: NetworkImage(
+                                                    snapshot2.data!.Data![index]!.creviewImage1!),
+                                                width: 80.w,
+                                                height: 50.h,
+                                                placeholder: const AssetImage("images/headphone.jpg"),
+                                                fit: BoxFit.fill,
+                                              ):Container(),
+
+                                              // Image.asset(
+                                              //   "images/headphone.jpg",
+                                              //   fit: BoxFit.fill,
+                                              //   height: 6.h,
+                                              //   width: 6.h,
+                                              // ),
+                                              SizedBox(
+                                                width: 6.w,
+                                              ),
+                                              snapshot2.data!.Data![index]!.creviewImage2 !=""?
+                                              FadeInImage(
+                                                image: NetworkImage(
+                                                    snapshot2.data!.Data![index]!.creviewImage2!),
+                                                width: 80.w,
+                                                height: 50.h,
+                                                placeholder: const AssetImage("images/headphone.jpg"),
+                                                fit: BoxFit.fill,
+                                              ):Container(),
+                                              SizedBox(
+                                                width: 6.w,
+                                              ),
+                                              snapshot2.data!.Data![index]!.creviewImage3 !=""?
+                                              FadeInImage(
+                                                image: NetworkImage(
+                                                    snapshot2.data!.Data![index]!.creviewImage3!),
+                                                width: 80.w,
+                                                height: 50.h,
+                                                placeholder: const AssetImage("images/headphone.jpg"),
+                                                fit: BoxFit.fill,
+                                              ):Container(),
+
+
+
+                                            ],
+                                          ),
+                                          const SizedBox(
+                                            height: 5,
+                                          ),
+                                          Row(
+                                            children: [
+                                              Text(
+                                                "${snapshot2.data!.Data![index]!.cusFirstName} ${snapshot2.data!.Data![index]!.cusLastName} ",
+                                                style: TextStyle(
+                                                    fontSize: 10.5.sp,
+                                                    color: Colors.grey,
+                                                    fontWeight: FontWeight.w500),
+                                              ),
+                                              Icon(
+                                                Icons.check_circle,
+                                                color: Colors.grey,
+                                                size: 12.sp,
+                                              ),
+                                              Text(
+                                                " Certified Buyer, Noida Oct, 18",
+                                                style: TextStyle(
+                                                    fontSize: 10.5.sp,
+                                                    color: Colors.grey,
+                                                    fontWeight: FontWeight.w500),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(
+                                            height: 5,
                                           ),
                                         ],
                                       ),
                                     ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                          right: 8.0, left: 8, top: 8),
-                                      child: Row(
-                                        children: [
-                                          Text(
-                                            "4 ",
-                                            style: TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 10.sp,
-                                                fontWeight: FontWeight.w600),
-                                          ),
-                                          Icon(
-                                            Icons.star,
-                                            size: 9.sp,
-                                            color: Colors.black,
-                                          ),
-                                          LinearPercentIndicator(
-                                            width: 38.w,
-                                            lineHeight: 6.0,
-                                            percent: 0.6,
-                                            barRadius: const Radius.circular(5),
-                                            progressColor: Colors.green[600],
-                                          ),
-                                          Text(
-                                            "12 ",
-                                            style: TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 12.sp,
-                                                fontWeight: FontWeight.w400),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                          right: 8.0, left: 8, top: 8),
-                                      child: Row(
-                                        children: [
-                                          Text(
-                                            "3 ",
-                                            style: TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 10.sp,
-                                                fontWeight: FontWeight.w600),
-                                          ),
-                                          Icon(
-                                            Icons.star,
-                                            size: 9.sp,
-                                            color: Colors.black,
-                                          ),
-                                          LinearPercentIndicator(
-                                            width: 38.w,
-                                            lineHeight: 6.0,
-                                            percent: 0.5,
-                                            barRadius: const Radius.circular(5),
-                                            progressColor: Colors.green[600],
-                                          ),
-                                          Text(
-                                            "8 ",
-                                            style: TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 12.sp,
-                                                fontWeight: FontWeight.w400),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                          right: 8.0, left: 8, top: 8),
-                                      child: Row(
-                                        children: [
-                                          Text(
-                                            "2 ",
-                                            style: TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 10.sp,
-                                                fontWeight: FontWeight.w600),
-                                          ),
-                                          Icon(
-                                            Icons.star,
-                                            size: 9.sp,
-                                            color: Colors.black,
-                                          ),
-                                          LinearPercentIndicator(
-                                            width: 38.w,
-                                            lineHeight: 6.0,
-                                            percent: 0.3,
-                                            progressColor: Colors.yellow[700],
-                                            barRadius: const Radius.circular(5),
-                                          ),
-                                          Text(
-                                            "6 ",
-                                            style: TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 12.sp,
-                                                fontWeight: FontWeight.w400),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                          right: 8.0, left: 8, top: 8),
-                                      child: Row(
-                                        children: [
-                                          Text(
-                                            "1 ",
-                                            style: TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 10.sp,
-                                                fontWeight: FontWeight.w600),
-                                          ),
-                                          Icon(
-                                            Icons.star,
-                                            size: 9.sp,
-                                            color: Colors.black,
-                                          ),
-                                          LinearPercentIndicator(
-                                            width: 38.w,
-                                            lineHeight: 6.0,
-                                            percent: 0.2,
-                                            barRadius: const Radius.circular(5),
-                                            progressColor: Colors.red[600],
-                                          ),
-                                          Text(
-                                            "3 ",
-                                            style: TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 12.sp,
-                                                fontWeight: FontWeight.w400),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
+                                  ),
                                 ),
                               ),
                             ],
-                          ),
-                        ],
-                      ),
+                          );
+                        } else if (snapshot2.hasError) {
+                          print("hello");
+                          return Container(
+                            child: const Center(
+                                child: Text(
+                                  "No Data ",
+                                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                                )),
+                          );
+                        } else {
+                          return const Center(
+                              child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  darkThemeOrange,
+                                ),
+                              ));
+                        }
+                      },
                     ),
-                    ListView.builder(
-                      //padding: EdgeInsets.only(top: 8, bottom: 0, left: 4.0.w, right: 4.0.w),
-                      scrollDirection: Axis.vertical,
-                      padding: const EdgeInsets.all(10),
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
 
-                      itemCount: 2,
-                      itemBuilder: (context, index) => InkWell(
-                        onTap: () {
-                          // Get.to(() => ProductByCategory(snapshot.data!.data![0]!.subcategory![index]!.id!));
-                        },
-                        child: Card(
-                          elevation: 0.5,
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Column(
-                              children: [
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.only(left: 5, right: 5),
-                                      height: 3.h,
-                                      //width: 19.w,
-                                      decoration: BoxDecoration(
-                                          color: Colors.green,
-                                          borderRadius: BorderRadius.circular(
-                                              5) // use instead of BorderRadius.all(Radius.circular(20))
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Icon(
-                                            Icons.star,
-                                            color: Colors.white,
-                                            size: 11.sp,
-                                          ),
-                                          Padding(
-                                            padding:
-                                            const EdgeInsets.only(left: 5.0, top: 1),
-                                            child: Text(
-                                              "4.5",
-                                              style: TextStyle(
-                                                  fontSize: 8.5.sp,
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.bold),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      width: 5,
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(left: 5.0, top: 3),
-                                      child: Text(
-                                        "Mind-blowing purchas",
-                                        style: TextStyle(
-                                            fontSize: 13.sp,
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.w600),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(
-                                  height: 8,
-                                ),
-                                Text(
-                                  "Good built quality , not a headphone with immense sound..u can hear the songs in full volume for long time...nd most important one it has a very good looks.. overall a worth buying one in this price",
-                                  style: TextStyle(
-                                      fontSize: 13.sp,
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.w400),
-                                ),
-                                const SizedBox(
-                                  height: 5,
-                                ),
-                                Row(
-                                  children: [
-                                    Image.asset(
-                                      "images/headphone.jpg",
-                                      fit: BoxFit.fill,
-                                      height: 6.h,
-                                      width: 6.h,
-                                    ),
-                                    SizedBox(
-                                      width: 6.w,
-                                    ),
-                                    Image.asset(
-                                      "images/dualmodeheadph.jpeg",
-                                      fit: BoxFit.fill,
-                                      height: 7.h,
-                                      width: 6.h,
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(
-                                  height: 5,
-                                ),
-                                Row(
-                                  children: [
-                                    Text(
-                                      "Adarsh Gupta ",
-                                      style: TextStyle(
-                                          fontSize: 10.5.sp,
-                                          color: Colors.grey,
-                                          fontWeight: FontWeight.w500),
-                                    ),
-                                    Icon(
-                                      Icons.check_circle,
-                                      color: Colors.grey,
-                                      size: 12.sp,
-                                    ),
-                                    Text(
-                                      " Certified Buyer, Noida Oct, 018",
-                                      style: TextStyle(
-                                          fontSize: 10.5.sp,
-                                          color: Colors.grey,
-                                          fontWeight: FontWeight.w500),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(
-                                  height: 5,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
                     SizedBox(
                       height: 3.h,
                     ),
@@ -1831,18 +1890,46 @@ class _ProductDetailsState extends State<ProductDetails> {
                       ):
                       InkWell(
                         onTap: () {
-                          setState(() {
-                            gotCrt=! gotCrt;
-                          });
-                          setCart1=true;
-                          Map body ={
-                            "cart_cus_id": userId,
-                            "cart_seller_id": "${snapshot.data!.Data!.itemSkuDetailsModels![0]!.sstkSellerId!}",
-                            "cart_itm_id": "${snapshot.data!.Data!.itmId!}",
-                            "cart_isku_id": "${snapshot.data!.Data!.itemSkuDetailsModels![0]!.iskuId!}",
-                            "cart_qty": "1"
-                          };
-                          _setCartBloc.setCart(body);
+                          if(userLogin){
+                            setState(() {
+                              gotCrt=! gotCrt;
+                            });
+                            setCart1=true;
+                            Map body ={
+                              "cart_cus_id": userId,
+                              "cart_seller_id": "${snapshot.data!.Data!.itemSkuDetailsModels![0]!.sstkSellerId!}",
+                              "cart_itm_id": "${snapshot.data!.Data!.itmId!}",
+                              "cart_isku_id": "${snapshot.data!.Data!.itemSkuDetailsModels![0]!.iskuId!}",
+                              "cart_qty": "1"
+                            };
+                            _setCartBloc.setCart(body);
+                          }else{
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  title: const Text('Please Login to Continue'),
+                                  //content: const Text('Please Login to Continue'),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context, rootNavigator: true)
+                                            .pop(false); // dismisses only the dialog and returns false
+                                      },
+                                      child: const Text('No'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        Get.to(() =>  const LoginPage());
+                                      },
+                                      child: const Text('Yes'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          }
+
                         },
                         child: StreamBuilder<ApiResponse<SetCartModel>>(
                           stream: _setCartBloc.setCartStream,
@@ -1929,15 +2016,43 @@ class _ProductDetailsState extends State<ProductDetails> {
                       ),
                       InkWell(
                         onTap: () {
-                          setCart=true;
-                          Map body ={
-                            "cart_cus_id": userId,
-                            "cart_seller_id": "${snapshot.data!.Data!.itemSkuDetailsModels![0]!.sstkSellerId!}",
-                            "cart_itm_id": "${snapshot.data!.Data!.itmId!}",
-                            "cart_isku_id": "${snapshot.data!.Data!.itemSkuDetailsModels![0]!.iskuId!}",
-                            "cart_qty": "1"
-                          };
-                          _setCartBloc.setCart(body);
+                          if(userLogin){
+                            setCart=true;
+                            Map body ={
+                              "cart_cus_id": userId,
+                              "cart_seller_id": "${snapshot.data!.Data!.itemSkuDetailsModels![0]!.sstkSellerId!}",
+                              "cart_itm_id": "${snapshot.data!.Data!.itmId!}",
+                              "cart_isku_id": "${snapshot.data!.Data!.itemSkuDetailsModels![0]!.iskuId!}",
+                              "cart_qty": "1"
+                            };
+                            _setCartBloc.setCart(body);
+                          }else{
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  title: const Text('Please Login to Continue'),
+                                  //content: const Text('Please Login to Continue'),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context, rootNavigator: true)
+                                            .pop(false); // dismisses only the dialog and returns false
+                                      },
+                                      child: const Text('No'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        Get.to(() =>  const LoginPage());
+                                      },
+                                      child: const Text('Yes'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          }
+
 
                           //Get.to(() =>  const CartPage());
                         },

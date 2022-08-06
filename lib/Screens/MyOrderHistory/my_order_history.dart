@@ -5,6 +5,8 @@ import 'package:sizer/sizer.dart';
 import 'package:topmaybe/constant.dart';
 import 'package:get/get.dart';
 
+import '../customWidgets/carticon_widget.dart';
+import 'OrderDetails/order_details.dart';
 import 'my_order_history_model.dart';
 import 'my_order_history_repository.dart';
 
@@ -74,6 +76,7 @@ class _MyOrderState extends State<MyOrder> {
           textAlign: TextAlign.start,
         ),
         actions: [
+          //const CartIconWidget(),
           IconButton(
             onPressed: () {},
             icon: Icon(
@@ -116,120 +119,133 @@ class _MyOrderState extends State<MyOrder> {
                           shrinkWrap: true,
                           itemCount: snapshot.data!.Data!.length,
                           itemBuilder: (context, index) {
-                            return Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                InkWell(
-                                  onTap: () {
+                            return InkWell(
+                              onTap: () {
+                                Get.to(() =>  OrderDetails(
+                                  orderid: snapshot.data!.Data![index]!.ordId!.toString(),
+                                  orderDateTime: snapshot.data!.Data![index]!.ordDate!,
+                                  orderStatus: snapshot.data!.Data![index]!.ostsName!,
+                                  name: snapshot.data!.Data![index]!.cusFirstName!,
+                                  cityName: snapshot.data!.Data![index]!.ctName!,
+                                  pinCode: snapshot.data!.Data![index]!.caddPincode!,
+                                  iskuImage_1: snapshot.data!.Data![index]!.iskuImage_1!,
+                                  itmName: snapshot.data!.Data![index]!.itmName!,
+                                  secondaryVarName: snapshot.data!.Data![index]!.secondaryVarName,
+                                  secondaryVaroName: snapshot.data!.Data![index]!.secondaryVaroName,
+                                  primaryVarName: snapshot.data!.Data![index]!.primaryVarName,
+                                  primaryVaroName: snapshot.data!.Data![index]!.primaryVaroName,
+                                  ordGrandTotal: snapshot.data!.Data![index]!.ordGrandTotal!.toStringAsFixed(0),
+                                  discountAmount: snapshot.data!.Data![index]!.ordCouponDiscountAmount!.toString(),
 
-                                  },
-                                  child: Card(
-                                      elevation: 2.0,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(5.0),
-                                      ),
-                                      margin: const EdgeInsets.only(top: 4.0, bottom: 14.0),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Row(
-                                          children: [
-                                            Expanded(
-                                              flex: 2,
-                                              child: Container(
-                                                height: screenWidth * 0.2,
-                                                clipBehavior: Clip.hardEdge,
-                                                decoration: const BoxDecoration(
-                                                  borderRadius:
-                                                  BorderRadius.all(Radius.circular(5.0)),
-                                                ),
-                                                child: FadeInImage(
-                                                  image: NetworkImage(
-                                                    snapshot.data!.Data![index]!.iskuImage_1!,
-                                                  ),
-                                                  placeholder: const AssetImage("images/headphone.jpg"),
-                                                  //fit: BoxFit.fill,
-                                                ),
-                                              ),
+
+
+
+                                ));
+                              },
+                              child: Card(
+                                  elevation: 2.0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(5.0),
+                                  ),
+                                  margin: const EdgeInsets.only(top: 4.0, bottom: 14.0),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          flex: 2,
+                                          child: Container(
+                                            height: screenWidth * 0.2,
+                                            clipBehavior: Clip.hardEdge,
+                                            decoration: const BoxDecoration(
+                                              borderRadius:
+                                              BorderRadius.all(Radius.circular(5.0)),
                                             ),
-                                            Expanded(
-                                              flex: 7,
-                                              child: Container(
-                                                margin: const EdgeInsets.only(
-                                                    left: 15.0,
-                                                    top: 5.0,
-                                                    bottom: 5.0,
-                                                    right: 10.0),
+                                            child: FadeInImage(
+                                              image: NetworkImage(
+                                                snapshot.data!.Data![index]!.iskuImage_1!,
+                                              ),
+                                              placeholder: const AssetImage("images/headphone.jpg"),
+                                              //fit: BoxFit.fill,
+                                            ),
+                                          ),
+                                        ),
+                                        Expanded(
+                                          flex: 7,
+                                          child: Container(
+                                            margin: const EdgeInsets.only(
+                                                left: 15.0,
+                                                top: 5.0,
+                                                bottom: 5.0,
+                                                right: 10.0),
 
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Row(
                                                   children: [
-                                                    Row(
-                                                      children: [
-                                                        Expanded(
-                                                          //flex:6,
-                                                          child: Text(
-                                                              snapshot.data!.Data![index]!.itmName!.toUpperCase(),
-                                                              overflow: TextOverflow.ellipsis,
-                                                              maxLines:1,
-                                                              style: TextStyle(
-                                                                fontWeight: FontWeight.w600,
-                                                                color: Colors.black,
+                                                    Expanded(
+                                                      //flex:6,
+                                                      child: Text(
+                                                          snapshot.data!.Data![index]!.itmName!.toUpperCase(),
+                                                          overflow: TextOverflow.ellipsis,
+                                                          maxLines:1,
+                                                          style: TextStyle(
+                                                            fontWeight: FontWeight.w600,
+                                                            color: Colors.black,
 
-                                                                fontSize: screenWidth * 0.04,
-                                                              )),
-                                                        ),
-
-                                                      ],
+                                                            fontSize: screenWidth * 0.04,
+                                                          )),
                                                     ),
-                                                    snapshot.data!.Data![index]!.secondaryVarName !=null ? SizedBox(height: 1.h,):const SizedBox(),
-                                                    snapshot.data!.Data![index]!.secondaryVarName !=null ? Text(
-                                                      "${snapshot.data!.Data![index]!.secondaryVarName} : ${snapshot.data!.Data![index]!.secondaryVaroName} ",
-                                                      style: TextStyle(
-                                                          color: Colors.black,
-                                                          fontWeight: FontWeight.w400,
-                                                          fontSize: screenWidth * 0.03),
-                                                    ): Container(),
-                                                    SizedBox(height: 1.h,),
-                                                    snapshot.data!.Data![index]!.primaryVarName !=null ? Text(
-                                                      "${snapshot.data!.Data![index]!.primaryVarName} : ${snapshot.data!.Data![index]!.primaryVaroName} ",
-                                                      style: TextStyle(
-                                                          color: Colors.black,
-                                                          fontWeight: FontWeight.w400,
-                                                          fontSize: screenWidth * 0.03),
-                                                    ): Container(),
-                                                    Container(
-                                                      margin: const EdgeInsets.only(top: 8.0),
-                                                      child: Row(
-                                                        children: [
-                                                          Text(
-                                                            "Rs ${snapshot.data!.Data![index]!.ordGrandTotal!.toStringAsFixed(0)}",
-                                                            style: TextStyle(
-                                                                color: Colors.black,
-                                                                fontWeight: FontWeight.w500,
-                                                                fontSize: screenWidth * 0.032),
-                                                          ),
-                                                          Container(
-                                                            margin: EdgeInsets.only(left: 18.0),
-                                                            // child: Image.asset(
-                                                            //   "images/heart2.png",
-                                                            //   width: 25.0,
-                                                            //   height: 25.0,
-                                                            // ),
-                                                          ),
-                                                          Spacer(),
-                                                        ],
-                                                      ),
-                                                    )
+
                                                   ],
                                                 ),
-                                              ),
-                                            )
-                                          ],
-                                        ),
-                                      )),
-                                ),
-                              ],
+                                                snapshot.data!.Data![index]!.secondaryVarName !=null ? SizedBox(height: 1.h,):const SizedBox(),
+                                                snapshot.data!.Data![index]!.secondaryVarName !=null ? Text(
+                                                  "${snapshot.data!.Data![index]!.secondaryVarName} : ${snapshot.data!.Data![index]!.secondaryVaroName} ",
+                                                  style: TextStyle(
+                                                      color: Colors.black,
+                                                      fontWeight: FontWeight.w400,
+                                                      fontSize: screenWidth * 0.03),
+                                                ): Container(),
+                                                SizedBox(height: 1.h,),
+                                                snapshot.data!.Data![index]!.primaryVarName !=null ? Text(
+                                                  "${snapshot.data!.Data![index]!.primaryVarName} : ${snapshot.data!.Data![index]!.primaryVaroName} ",
+                                                  style: TextStyle(
+                                                      color: Colors.black,
+                                                      fontWeight: FontWeight.w400,
+                                                      fontSize: screenWidth * 0.03),
+                                                ): Container(),
+                                                Container(
+                                                  margin: const EdgeInsets.only(top: 8.0),
+                                                  child: Row(
+                                                    children: [
+                                                      Text(
+                                                        "Rs ${snapshot.data!.Data![index]!.ordGrandTotal!.toStringAsFixed(0)}",
+                                                        style: TextStyle(
+                                                            color: Colors.black,
+                                                            fontWeight: FontWeight.w500,
+                                                            fontSize: screenWidth * 0.032),
+                                                      ),
+                                                      Container(
+                                                        margin: EdgeInsets.only(left: 18.0),
+                                                        // child: Image.asset(
+                                                        //   "images/heart2.png",
+                                                        //   width: 25.0,
+                                                        //   height: 25.0,
+                                                        // ),
+                                                      ),
+                                                      Spacer(),
+                                                    ],
+                                                  ),
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  )),
                             );
                           },
                         ),

@@ -68,14 +68,14 @@ class _OrderPlaceState extends State<OrderPlace> {
     createSharedPref();
     // _getLocation();
   }
-  // navToAttachList(context,OrderPlaceResponseModel data) async {
-  //   Future.delayed(Duration.zero, () {
-  //     Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) {
-  //       return RazorPayScreen(snapshotData: data,userToken: userToken,totalCartAmount: totalCartAmount,);
-  //     }));
-  //     _orderplaced=false;
-  //   });
-  // }
+  navToAttachList(context,SetOrderModel data) async {
+    Future.delayed(Duration.zero, () {
+      Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) {
+        return RazorPayScreen(snapshotData: data,userPhone: userPhone,totalCartAmount: "100",);
+      }));
+      _orderplaced=false;
+    });
+  }
 
   String address="";
   @override
@@ -125,7 +125,7 @@ class _OrderPlaceState extends State<OrderPlace> {
                   MediaQuery.of(context).size.height * 0.015,
                   MediaQuery.of(context).size.height * 0.015,
                   MediaQuery.of(context).size.height * 0.020),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(12.0)),
                   color: Colors.white),
               child: Column(
@@ -513,45 +513,41 @@ class _OrderPlaceState extends State<OrderPlace> {
               onTap: () {
 
                 if(_paymentMode!=""){
-
-                  if(_paymentMode =="cod"){
-                    _orderplaced=true;
-                    Map body ={
-                      "ord_cus_id": userId,
-                      "ord_cadd_id": widget.addressId,
-                      "ord_coupon_id": 1,
-                      "ord_instruction": "Instructions",
-                      "ord_pgc_id": 1
-                    };
-                    _setOrderBloc.orderPlaced(body);
-                  }else{
-                        Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) {
-                          return const RazorPayScreen(userToken: "",totalCartAmount: "22",);
-                        }));
-                    Fluttertoast.showToast(
-                        msg: "You are Redirecting to Payment Gateway",
-                        fontSize: 16,
-                        backgroundColor: Colors.white,
-                        textColor: darkThemeBlue,
-                        gravity: ToastGravity.CENTER,
-                        toastLength: Toast.LENGTH_LONG);
-
-                  }
-                  Get.to(() => const OrderConfirm());
-
-                  //OrderConfirm
-                  // Map _body={
-                  //   "userid":"$userId",
-                  //   "cartid":"$cartId",
-                  //   "addressid":"$addressId",
-                  //   "payment_type":"$_paymentMode",
-                  //   "coupon_code": coupon_code,
-                  //   "order_remarks": _description.text.toString(),
-                  //   "distance":distanceP.toString(),
-                  //   "scheduled_at":"${_dateController.text.trim()} ${_startTimingController.text.trim()}"
+                  _orderplaced=true;
+                  Map body ={
+                    "ord_cus_id": userId,
+                    "ord_cadd_id": widget.addressId,
+                    "ord_coupon_id": 1,
+                    "ord_instruction": "Instructions",
+                    "ord_pgc_id": 1
+                  };
+                  _setOrderBloc.orderPlaced(body);
+                  // if(_paymentMode =="cod"){
+                  //   _orderplaced=true;
+                  //   Map body ={
+                  //     "ord_cus_id": userId,
+                  //     "ord_cadd_id": widget.addressId,
+                  //     "ord_coupon_id": 1,
+                  //     "ord_instruction": "Instructions",
+                  //     "ord_pgc_id": 1
+                  //   };
+                  //   _setOrderBloc.orderPlaced(body);
+                  // }
+                  // else{
+                  //       Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) {
+                  //         return const RazorPayScreen(userToken: "",totalCartAmount: "22",);
+                  //       }));
+                  //   Fluttertoast.showToast(
+                  //       msg: "You are Redirecting to Payment Gateway",
+                  //       fontSize: 16,
+                  //       backgroundColor: Colors.white,
+                  //       textColor: darkThemeBlue,
+                  //       gravity: ToastGravity.CENTER,
+                  //       toastLength: Toast.LENGTH_LONG);
                   //
-                  // };
-                  // _orderPlaceBloc.orderPlace(_body, userToken);
+                  // }
+                  // Get.to(() => const OrderConfirm());
+
                 }else{
                   Fluttertoast.showToast(
                       msg: "Please Select Payment Mode",
@@ -593,7 +589,18 @@ class _OrderPlaceState extends State<OrderPlace> {
                                   textColor: darkThemeBlue,
                                   toastLength: Toast.LENGTH_LONG);
 
-                             }
+                             } else if(_paymentMode == "online"){
+
+                              //managedSharedPref(snapshot2.data!.data);
+                              navToAttachList(context,snapshot2.data!.data);
+                              Fluttertoast.showToast(
+                                  msg: "You are Redirecting to Payment Gateway",
+                                  fontSize: 16,
+                                  backgroundColor: Colors.white,
+                                  textColor: darkThemeBlue,
+                                  gravity: ToastGravity.CENTER,
+                                  toastLength: Toast.LENGTH_LONG);
+                            }
                             // else{
                             //   Fluttertoast.showToast(
                             //       msg: "Something is wrong",

@@ -8,8 +8,8 @@ class MyOrderHistoryRepository{
 
   Future<MyOrderHistoryModel> getOrderHistory(String userId) async{
      Map body={};
-    //final response= await _apiBaseHelper.post("api/Order/GetListForCustomer/$userId", body);
-     final response= await _apiBaseHelper.post("api/Order/GetListForCustomer/1", body);
+    final response= await _apiBaseHelper.post("api/Order/GetListForCustomer/$userId", body);
+     //final response= await _apiBaseHelper.post("api/Order/GetListForCustomer/1", body);
     return MyOrderHistoryModel.fromJson(response);
   }
 }

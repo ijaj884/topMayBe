@@ -7,6 +7,7 @@ import 'package:topmaybe/constant.dart';
 import '../CartPage/GetCart/get_cart_model.dart';
 import '../CartPage/GetCart/get_cart_repository.dart';
 import '../CartPage/cart_page.dart';
+import '../Login/login_page.dart';
 class CartIconWidget extends StatefulWidget {
   const CartIconWidget({Key? key}) : super(key: key);
 
@@ -51,7 +52,36 @@ class _CartIconWidgetState extends State<CartIconWidget> {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: (){
-        Get.to(() => const CartPage());
+        if(userLogin){
+          Get.to(() => const CartPage());
+        }
+        else{
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: const Text('Please Login to Continue'),
+                //content: const Text('Please Login to Continue'),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context, rootNavigator: true)
+                          .pop(false); // dismisses only the dialog and returns false
+                    },
+                    child: const Text('No'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Get.to(() =>  const LoginPage());
+                    },
+                    child: const Text('Yes'),
+                  ),
+                ],
+              );
+            },
+          );
+        }
+
       },
       child: Stack(
         clipBehavior: Clip.none,

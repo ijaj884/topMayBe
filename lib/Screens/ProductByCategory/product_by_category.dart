@@ -341,8 +341,10 @@ class _ProductByCategoryState extends State<ProductByCategory> {
            borderRadius: BorderRadius.circular(5.0),
          ),
          backgroundColor: Colors.white,
+         elevation: 2,
          isScrollControlled: true,
-         //backgroundColor: Colors.cyan,
+
+         //barrierColor: Colors.blue.withOpacity(0),
          builder: (builder){
            return  ChildCat(catName: catName,catId: catId,);
          }

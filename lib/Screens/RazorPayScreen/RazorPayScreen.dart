@@ -13,16 +13,17 @@ import 'package:topmaybe/Screens/HomeScreen/home_screen.dart';
 import 'package:topmaybe/constant.dart';
 
 import '../../api_base/api_base_helper.dart';
+import '../OrderPlace/SetOrder/set_order_model.dart';
 import '../OrderPlace/order_Confirm/order_Confirm.dart';
 
 
 
 class RazorPayScreen extends StatefulWidget {
-  //final OrderPlaceResponseModel snapshotData;
-  final String userToken;
+  final SetOrderModel snapshotData;
+  final String userPhone;
   final String totalCartAmount;
 
-  const RazorPayScreen({Key? key, required this.userToken, required this.totalCartAmount}) : super(key: key);
+  const RazorPayScreen({Key? key, required this.userPhone, required this.totalCartAmount, required this.snapshotData}) : super(key: key);
   //const RazorPayScreen({ required this.userToken, required this.totalCartAmount});
 
 
@@ -131,22 +132,16 @@ class _RazorPayScreenState extends State<RazorPayScreen> {
   }
 
   void openCheckout() async {
-    // 'key': 'rzp_test_BgJqsaZuDQ01OE',
-    //  'amount': 100,
-    // "image":
-    //     "https://www.google.com/url?sa=i&url=https%3A%2F%2Ftimesofindia.indiatimes.com%2Flife-style%2Ffood-news%2Fcoronaeffect-restros-food-aggregators-step-up-their-game-to-ensure-safe-delivery-and-pickup-of-food%2Farticleshow%2F75891020.cms&psig=AOvVaw0_DmeL0vcWqQtop0stSsvg&ust=1605856153360000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCKDcgr-Gju0CFQAAAAAdAAAAABAI",
-
-    // 'key': 'rzp_test_ehhzapZ5Arkz2H',
     var options = {
-      //rzp_test_rkCEZ1C6W2O0Ji //rzp_test_p000L8FV2LBwx8
-      'key': 'rzp_test_p000L8FV2LBwx8',
+      'key': 'rzp_live_5eHtJiA3nAaxJs',//'rzp_test_p000L8FV2LBwx8',//'rzp_live_5eHtJiA3nAaxJsJciPqTB5CQtJup',
 
       'name': 'TopMaybe',
       'description': 'TopMaybe Order Payment',
-      'order_id': '15254515',
-      'amount' : 100,
+      'order_id': '${widget.snapshotData.Data!.ordOrhId}',
+      //'amount' : 100,
+      //'send_sms_hash': true,
       'prefill': {
-        'contact': '$userPhone',
+        'contact': widget.userPhone,
         'email': 'abv@gmail.com',
         'name': 'suman'
       },
@@ -160,12 +155,13 @@ class _RazorPayScreenState extends State<RazorPayScreen> {
       _razorpay.open(options);
     } catch (e) {
       debugPrint(e.toString());
+      print("-------------------------------------- ${e.toString()}");
     }
   }
 
   Future<void> _handlePaymentSuccess(PaymentSuccessResponse response) async {
     Map _body = {
-      "ord_orh_id": 2,
+      "ord_orh_id": widget.snapshotData.Data!.ordOrhId,
       "ord_is_paid": true,
       "ord_transaction_no": response.orderId!
     };
@@ -204,7 +200,7 @@ class _RazorPayScreenState extends State<RazorPayScreen> {
     print("error");
     print("Ijaj");
     Map _body = {
-      "ord_orh_id": 2,
+      "ord_orh_id": widget.snapshotData.Data!.ordOrhId,
       "ord_is_paid": false,
       "ord_transaction_no": response.code
     };
@@ -228,6 +224,7 @@ class _RazorPayScreenState extends State<RazorPayScreen> {
   void _handleExternalWallet(ExternalWalletResponse response) {
     Fluttertoast.showToast(
         msg: "EXTERNAL_WALLET: " + response.walletName!, timeInSecForIosWeb: 4);
+    print("Wallet : ${response.walletName!} -------------- $response");
     // Navigator.of(context)
     //     .push(MaterialPageRoute(builder: (context) => IndexPage()));
   }

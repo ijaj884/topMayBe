@@ -1,14 +1,21 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 //import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 import 'package:topmaybe/Screens/Product/product_model.dart';
 import 'package:topmaybe/Screens/Product/product_repository.dart';
 
+import '../../api_base/api_response.dart';
 import '../../constant.dart';
+import '../CartPage/SetCart/SetCartBloc.dart';
+import '../CartPage/SetCart/setcart_model.dart';
 import '../CartPage/cart_page.dart';
+import '../Login/login_page.dart';
+import '../MyAddress/address_list_page.dart';
 import '../ProductDetails/product_details.dart';
 import 'GetFilteredItemList/get_filtered_item_list_model.dart';
 import 'GetFilteredItemList/get_filtered_item_list_repository.dart';
@@ -32,11 +39,14 @@ class _ProductState extends State<Product> {
 
   Future<GetFilteredItemListModel>? _getFilterItem;
   late GetFilteredItemListRepository _getFilteredItemListRepository;
-  String userId="0";
+  String ?userId="0";
   final GlobalKey<ScaffoldState> _key = GlobalKey();
-
+  late SharedPreferences prefs;
   Future<void> createSharedPref() async {
-
+    prefs = await SharedPreferences.getInstance();
+    if (userLogin) {
+      userId = prefs.getString("user_id");
+    }
     _getFilteredItemListRepository=GetFilteredItemListRepository();
     Map body = {
       "cus_id": userId,
@@ -51,6 +61,9 @@ class _ProductState extends State<Product> {
   }
   String wistList="";
   bool _isFavorite = true;
+  bool setCart=false;
+  final SetCartBloc _setCartBloc=SetCartBloc();
+
 
   @override
   void initState() {
@@ -807,24 +820,124 @@ class _ProductState extends State<Product> {
                                 right: 0,
                                 child: InkWell(
                                   onTap: () {
-                                    Get.to(() => const CartPage());
+                                    if(userLogin){
+                                      setCart=true;
+                                      Map body ={
+                                        "cart_cus_id": userId,
+                                        "cart_seller_id": "${snapshot.data!.Data![index]!.iskuId}",
+                                        "cart_itm_id": "${snapshot.data!.Data![index]!.iskuItmId}",
+                                        "cart_isku_id": "${snapshot.data!.Data![index]!.iskuId!}",
+                                        "cart_qty": "1"
+                                      };
+                                      _setCartBloc.setCart(body);
+                                    }else{
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return AlertDialog(
+                                            title: const Text('Please Login to Continue'),
+                                            //content: const Text('Please Login to Continue'),
+                                            actions: <Widget>[
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.of(context, rootNavigator: true)
+                                                      .pop(false); // dismisses only the dialog and returns false
+                                                },
+                                                child: const Text('No'),
+                                              ),
+                                              TextButton(
+                                                onPressed: () {
+                                                  Get.to(() =>  const LoginPage());
+                                                },
+                                                child: const Text('Yes'),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    }
+                                    //Get.to(() => const CartPage());
                                   },
-                                  child: Card(
-                                    elevation: 10,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius. circular(20),
-                                    ),
-                                    color: Colors.white,
-                                    child: SizedBox(
-                                      height: 4.h,
-                                      width: 4.h,
-                                      child: const Center(
-                                        child:  Icon(
-                                          Icons.shopping_cart,
-                                          color: Color.fromRGBO(176, 176, 176, 1),
+                                  child: StreamBuilder<ApiResponse<SetCartModel>>(
+                                    stream: _setCartBloc.setCartStream,
+                                    builder: (context, snapshot2) {
+                                      if (snapshot2.hasData) {
+                                        switch (snapshot2.data!.status) {
+                                          case Status.LOADING:
+                                          // return const CircularProgressIndicator(
+                                          //     backgroundColor: Colors.white,
+                                          //     strokeWidth: 3,
+                                          //     valueColor: AlwaysStoppedAnimation<Color>(
+                                          //         darkThemeOrange));
+
+                                            break;
+                                          case Status.COMPLETED:
+                                            {
+                                              if (setCart) {
+
+                                                if(snapshot2.data!.data.Code != 0){
+                                                  // managedSharedPref(snapshot2.data!.data);
+                                                  Future.delayed(Duration.zero, () {
+                                                    Get.to(() => const AddressListPage());
+
+                                                  });
+
+                                                }else{
+                                                  Fluttertoast.showToast(
+                                                      msg: "Something is wrong",
+                                                      fontSize: 14,
+                                                      backgroundColor: Colors.white,
+                                                      gravity: ToastGravity.CENTER,
+                                                      textColor: darkThemeBlue,
+                                                      toastLength: Toast.LENGTH_LONG);
+                                                }
+                                              }
+                                              setCart = false;
+
+                                            }
+                                            break;
+                                          case Status.ERROR:
+                                            if (kDebugMode) {
+                                              print(snapshot.error);
+                                              Fluttertoast.showToast(
+                                                  msg: "Something is wrong",
+                                                  fontSize: 14,
+                                                  backgroundColor: Colors.white,
+                                                  gravity: ToastGravity.CENTER,
+                                                  textColor: darkThemeBlue,
+                                                  toastLength: Toast.LENGTH_LONG);
+                                              //   Error(
+                                              //   errorMessage: snapshot.data.message,
+                                              // );
+
+                                            }
+                                            break;
+                                        }
+                                      } else if (snapshot.hasError) {
+                                        if (kDebugMode) {
+                                          print("error");
+                                        }
+                                      }
+                                      return Card(
+                                        elevation: 10,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(20),
                                         ),
-                                      ),
-                                    ),
+                                        color: Colors.white,
+                                        child: SizedBox(
+                                          height: 4.h,
+                                          width: 4.h,
+                                          child: Center(
+                                            child: Icon(
+                                              Icons.shopping_cart,
+                                              size: 15.sp,
+                                              color:
+                                              const Color.fromRGBO(176, 176, 176, 1),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ),
                               ),
