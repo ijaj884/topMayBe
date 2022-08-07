@@ -43,6 +43,7 @@ dependencies:
   flutter_html: ^2.2.1
   flutter_svg: ^0.23.0+1
   intl: ^0.17.0
+  flutter_rating_bar: ^4.0.1
 
 
   # The following adds the Cupertino Icons font to your application.

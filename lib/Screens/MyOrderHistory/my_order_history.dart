@@ -136,6 +136,8 @@ class _MyOrderState extends State<MyOrder> {
                                   primaryVaroName: snapshot.data!.Data![index]!.primaryVaroName,
                                   ordGrandTotal: snapshot.data!.Data![index]!.ordGrandTotal!.toStringAsFixed(0),
                                   discountAmount: snapshot.data!.Data![index]!.ordCouponDiscountAmount!.toString(),
+                                  itmId: snapshot.data!.Data![index]!.ordItmId!.toString(),
+                                  skuId: snapshot.data!.Data![index]!.ordIskuId!.toString(),
 
 
 

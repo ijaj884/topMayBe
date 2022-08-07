@@ -1,5 +1,5 @@
-
 import 'dart:ui';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +13,8 @@ import 'package:sizer/sizer.dart';
 import '../../../constant.dart';
 import '../my_order_history_model.dart';
 
+import 'ReviewProduct/peview_product.dart';
+
 class OrderDetails extends StatefulWidget {
   final String orderid;
   final String orderDateTime;
@@ -22,28 +24,39 @@ class OrderDetails extends StatefulWidget {
   final String pinCode;
   final String iskuImage_1;
   final String itmName;
-  final String ?secondaryVarName;
-  final String ? secondaryVaroName;
-  final String ? primaryVarName;
-  final String ? primaryVaroName;
+  final String? secondaryVarName;
+  final String? secondaryVaroName;
+  final String? primaryVarName;
+  final String? primaryVaroName;
   final String ordGrandTotal;
   final String discountAmount;
-
+  final String itmId;
+  final String skuId;
 
   //const OrderDetails({ required this.orderid, this.data});
-  const OrderDetails({Key? key, required this.orderid, required this.orderDateTime,
-    required this.orderStatus, required this.name, required this.cityName, required this.pinCode,
-    required this.iskuImage_1, required this.itmName,  this.secondaryVarName, this.secondaryVaroName,
-    this.primaryVarName, this.primaryVaroName, required this.ordGrandTotal, required this.discountAmount}) : super(key: key);
-
+  const OrderDetails(
+      {Key? key,
+      required this.orderid,
+      required this.orderDateTime,
+      required this.orderStatus,
+      required this.name,
+      required this.cityName,
+      required this.pinCode,
+      required this.iskuImage_1,
+      required this.itmName,
+      this.secondaryVarName,
+      this.secondaryVaroName,
+      this.primaryVarName,
+      this.primaryVaroName,
+      required this.ordGrandTotal,
+      required this.discountAmount, required this.itmId, required this.skuId})
+      : super(key: key);
 
   @override
   _OrderDetailsState createState() => _OrderDetailsState();
 }
 
 class _OrderDetailsState extends State<OrderDetails> {
-
-
   @override
   void initState() {
     super.initState();
@@ -53,11 +66,11 @@ class _OrderDetailsState extends State<OrderDetails> {
 
   late SharedPreferences prefs;
   String userToken = "";
-  String userId="";
+  String userId = "";
 
   Future<void> createSharedPref() async {
     prefs = await SharedPreferences.getInstance();
-    userId=prefs.getString("user_id")!;
+    userId = prefs.getString("user_id")!;
 
     //userToken = prefs.getString("user_token")!;
 
@@ -136,22 +149,21 @@ class _OrderDetailsState extends State<OrderDetails> {
           physics: const ScrollPhysics(),
           children: [
             Container(
-              margin:  const EdgeInsets.only(
+              margin: const EdgeInsets.only(
                 top: 15.0,
               ),
               child: Center(
                 child: Text(
                   "ORDER ID : ${widget.orderid}",
-                  style:  const TextStyle(
+                  style: const TextStyle(
                       color: darkThemeBlue,
                       fontSize: 15.0,
                       fontWeight: FontWeight.bold),
                 ),
               ),
             ),
-
             Padding(
-              padding: EdgeInsets.only(top: 8.0,left: scW*0.05),
+              padding: EdgeInsets.only(top: 8.0, left: scW * 0.05),
               child: Row(
                 // mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
@@ -162,9 +174,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                   // ),
                   // Spacer(),
                   Padding(
-                    padding: const EdgeInsets.only(
-                        left: 8.0,right: 8
-                    ),
+                    padding: const EdgeInsets.only(left: 8.0, right: 8),
                     child: Column(
                       children: [
                         Container(
@@ -179,11 +189,15 @@ class _OrderDetailsState extends State<OrderDetails> {
                         //   Icons.circle,
                         //   color: themePinkColor,size: 15,
                         // ),
-                        Container(height: 60,color: Colors.green,width: 3,),
+                        Container(
+                          height: 60,
+                          color: Colors.green,
+                          width: 3,
+                        ),
                         Container(
                           width: 10.0,
                           height: 10.0,
-                          decoration:  const BoxDecoration(
+                          decoration: const BoxDecoration(
                             color: Colors.green,
                             shape: BoxShape.circle,
                           ),
@@ -196,36 +210,87 @@ class _OrderDetailsState extends State<OrderDetails> {
                     children: [
                       const Text(
                         "Ordered",
-                        style:  TextStyle(color: Colors.black, fontSize: 14.0,fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 14.0,
+                            fontWeight: FontWeight.bold),
                       ),
-                      const SizedBox(height: 5,),
+                      const SizedBox(
+                        height: 5,
+                      ),
                       Text(
-                        DateFormat.yMMMMEEEEd().format(DateFormat("yyyy-MM-dd").parse(widget.orderDateTime, true)),
-                        style:  const TextStyle(color:Colors.black, fontSize: 14.0),
+                        DateFormat.yMMMMEEEEd().format(DateFormat("yyyy-MM-dd")
+                            .parse(widget.orderDateTime, true)),
+                        style: const TextStyle(
+                            color: Colors.black, fontSize: 14.0),
                       ),
-                      SizedBox(height: 35,),
-
+                      SizedBox(
+                        height: 35,
+                      ),
                       const Text(
                         "Order Status",
-                        style: TextStyle(color:Colors.black, fontSize: 14.0,fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 14.0,
+                            fontWeight: FontWeight.bold),
                       ),
-                      const SizedBox(height:5,),
-                      widget.orderStatus == "Order Placed" ?
-                      const Text(
-                        "Successful",
-                        style:  TextStyle(color: Colors.green, fontSize: 14.0,fontWeight: FontWeight.bold),
-                      ):
-                      const Text(
-                        "FAILED",
-                        style:  TextStyle(color: Colors.red, fontSize: 14.0,fontWeight: FontWeight.bold),
+                      const SizedBox(
+                        height: 5,
                       ),
+                      widget.orderStatus == "Order Placed"
+                          ? const Text(
+                              "Successful",
+                              style: TextStyle(
+                                  color: Colors.green,
+                                  fontSize: 14.0,
+                                  fontWeight: FontWeight.bold),
+                            )
+                          : const Text(
+                              "FAILED",
+                              style: TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 14.0,
+                                  fontWeight: FontWeight.bold),
+                            ),
                     ],
                   ),
-
                 ],
               ),
             ),
+            Padding(
+              padding:  EdgeInsets.only(top: 3.0.h, left: scW * 0.05),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Rate this product",style: TextStyle(fontSize: 14.sp,color: Colors.black),),
+                  RatingBar.builder(
+                    initialRating: 0,
+                    minRating: 1,
+                    direction: Axis.horizontal,
+                    allowHalfRating: true,
+                    itemCount: 5,
+                    itemPadding: const EdgeInsets.symmetric(horizontal: 1.0),
+                    itemBuilder: (context, _) => const Icon(
+                      Icons.star,
+                      color: darkThemeOrange,
+                    ),
+                    onRatingUpdate: (rating) {
+                      print(rating);
+                      Get.to(() =>  ReviewProduct(
+                        skuId: widget.skuId,
+                        itmId: widget.itmId,
+                        itmName: widget.itmName,
+                        iskuImage_1: widget.iskuImage_1,
+                        orderid: widget.orderid,
+                        orderDateTime: widget.orderDateTime,
+                        rating: rating.toStringAsFixed(0),
+                      ));
 
+                    },
+                  ),
+                ],
+              ),
+            ),
             Container(
               // height: scH * 0.26,
               padding: const EdgeInsets.all(15.0),
@@ -241,8 +306,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                       Row(
                         children: [
                           const Padding(
-                            padding: EdgeInsets.only(
-                                left: 8.0, bottom: 10),
+                            padding: EdgeInsets.only(left: 8.0, bottom: 10),
                             child: Icon(
                               Icons.home,
                               color: Colors.orange,
@@ -253,8 +317,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                               padding: const EdgeInsets.only(
                                   left: 10.0, top: 12, bottom: 10),
                               child: Column(
-                                crossAxisAlignment:
-                                CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
                                   const Text(
@@ -323,25 +386,25 @@ class _OrderDetailsState extends State<OrderDetails> {
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
-                                  widget.name !=" " ?
-                                  Text(
-                                    widget.name,
-                                    style: const TextStyle(
-                                      color:Colors.black,
-                                      fontSize: 14.0,
-                                    ),
-                                  ):
-                                  Text(
-                                    "Name",
-                                    style: const TextStyle(
-                                      color:Colors.black,
-                                      fontSize: 14.0,
-                                    ),
-                                  ),
+                                  widget.name != " "
+                                      ? Text(
+                                          widget.name,
+                                          style: const TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 14.0,
+                                          ),
+                                        )
+                                      : Text(
+                                          "Name",
+                                          style: const TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 14.0,
+                                          ),
+                                        ),
                                   const Text(
                                     "9876543210",
                                     style: TextStyle(
-                                      color:Colors.black,
+                                      color: Colors.black,
                                       fontSize: 14.0,
                                     ),
                                   ),
@@ -358,7 +421,8 @@ class _OrderDetailsState extends State<OrderDetails> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(5.0),
                             ),
-                            margin: const EdgeInsets.only(top: 4.0, bottom: 14.0),
+                            margin:
+                                const EdgeInsets.only(top: 4.0, bottom: 14.0),
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Row(
@@ -369,14 +433,15 @@ class _OrderDetailsState extends State<OrderDetails> {
                                       height: scW * 0.2,
                                       clipBehavior: Clip.hardEdge,
                                       decoration: const BoxDecoration(
-                                        borderRadius:
-                                        BorderRadius.all(Radius.circular(5.0)),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(5.0)),
                                       ),
                                       child: FadeInImage(
                                         image: NetworkImage(
                                           widget.iskuImage_1,
                                         ),
-                                        placeholder: const AssetImage("images/headphone.jpg"),
+                                        placeholder: const AssetImage(
+                                            "images/headphone.jpg"),
                                         //fit: BoxFit.fill,
                                       ),
                                     ),
@@ -389,57 +454,71 @@ class _OrderDetailsState extends State<OrderDetails> {
                                           top: 5.0,
                                           bottom: 5.0,
                                           right: 10.0),
-
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Row(
                                             children: [
                                               Expanded(
                                                 //flex:6,
-                                                child: Text(
-                                                    widget.itmName,
-                                                    overflow: TextOverflow.ellipsis,
-                                                    maxLines:1,
+                                                child: Text(widget.itmName,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    maxLines: 1,
                                                     style: TextStyle(
-                                                      fontWeight: FontWeight.w600,
+                                                      fontWeight:
+                                                          FontWeight.w600,
                                                       color: Colors.black,
-
                                                       fontSize: scW * 0.04,
                                                     )),
                                               ),
-
                                             ],
                                           ),
-                                          widget.secondaryVarName !=null ? SizedBox(height: 1.h,):const SizedBox(),
-                                          widget.secondaryVarName !=null ? Text(
-                                            "${widget.secondaryVarName} : ${widget.secondaryVaroName} ",
-                                            style: TextStyle(
-                                                color: Colors.black,
-                                                fontWeight: FontWeight.w400,
-                                                fontSize: scW * 0.03),
-                                          ): Container(),
-                                          SizedBox(height: 1.h,),
-                                          widget.primaryVarName !=null ? Text(
-                                            "${widget.primaryVarName} : ${widget.primaryVaroName} ",
-                                            style: TextStyle(
-                                                color: Colors.black,
-                                                fontWeight: FontWeight.w400,
-                                                fontSize: scW * 0.03),
-                                          ): Container(),
+                                          widget.secondaryVarName != null
+                                              ? SizedBox(
+                                                  height: 1.h,
+                                                )
+                                              : const SizedBox(),
+                                          widget.secondaryVarName != null
+                                              ? Text(
+                                                  "${widget.secondaryVarName} : ${widget.secondaryVaroName} ",
+                                                  style: TextStyle(
+                                                      color: Colors.black,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                      fontSize: scW * 0.03),
+                                                )
+                                              : Container(),
+                                          SizedBox(
+                                            height: 1.h,
+                                          ),
+                                          widget.primaryVarName != null
+                                              ? Text(
+                                                  "${widget.primaryVarName} : ${widget.primaryVaroName} ",
+                                                  style: TextStyle(
+                                                      color: Colors.black,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                      fontSize: scW * 0.03),
+                                                )
+                                              : Container(),
                                           Container(
-                                            margin: const EdgeInsets.only(top: 8.0),
+                                            margin:
+                                                const EdgeInsets.only(top: 8.0),
                                             child: Row(
                                               children: [
                                                 Text(
                                                   "Rs ${widget.ordGrandTotal}",
                                                   style: TextStyle(
                                                       color: Colors.black,
-                                                      fontWeight: FontWeight.w500,
+                                                      fontWeight:
+                                                          FontWeight.w500,
                                                       fontSize: scW * 0.032),
                                                 ),
                                                 Container(
-                                                  margin: EdgeInsets.only(left: 18.0),
+                                                  margin: EdgeInsets.only(
+                                                      left: 18.0),
                                                   // child: Image.asset(
                                                   //   "images/heart2.png",
                                                   //   width: 25.0,
@@ -459,38 +538,39 @@ class _OrderDetailsState extends State<OrderDetails> {
                             )),
                       ),
 
-                      widget.discountAmount !="0" ?
-                      Padding(
-                        padding:
-                        const EdgeInsets.only(left: 10.0, right: 10,bottom: 15),
-                        child: Row(
-                          children: [
-                            const Expanded(
-                              flex: 4,
-                              child: Text(
-                                "Coupon discount",
-                                style: TextStyle(
-                                  color: darkThemeOrange,
-                                  fontSize: 14.0,fontWeight: FontWeight.w400,
-                                ),
+                      widget.discountAmount != "0"
+                          ? Padding(
+                              padding: const EdgeInsets.only(
+                                  left: 10.0, right: 10, bottom: 15),
+                              child: Row(
+                                children: [
+                                  const Expanded(
+                                    flex: 4,
+                                    child: Text(
+                                      "Coupon discount",
+                                      style: TextStyle(
+                                        color: darkThemeOrange,
+                                        fontSize: 14.0,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 2,
+                                    child: Text(
+                                      "\u20B9 ${widget.discountAmount}",
+                                      style: const TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 14.0,
+                                          fontWeight: FontWeight.w400),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                            Expanded(
-                              flex: 2,
-                              child: Text(
-                                "\u20B9 ${widget.discountAmount}",
-                                style: const TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 14.0,fontWeight: FontWeight.w400),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ):
-                      Container(),
+                            )
+                          : Container(),
                       const Padding(
-                        padding:
-                        EdgeInsets.only(left: 10.0, right: 10),
+                        padding: EdgeInsets.only(left: 10.0, right: 10),
                         child: Divider(),
                       ),
                       // Padding(
@@ -611,15 +691,9 @@ class _OrderDetailsState extends State<OrderDetails> {
                     ],
                   )),
             ),
-
           ],
         ),
       ),
     );
-
-
-
-
-
   }
 }
